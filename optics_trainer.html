@@ -1,0 +1,1523 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тренажёр менеджера — Питер Оптика</title>
+<style>
+  :root {
+    --bg:#EBF5FD; --surface:#FFFFFF; --surface2:#F0F8FF; --border:#C0D9EE;
+    --primary:#2BA4E8; --primary-dark:#1A7DC0; --primary-light:#E3F3FC;
+    --success:#0C9970; --danger:#E53E3E; --text:#0D2447; --text-muted:#5B7FA6;
+    --step-done:#0C9970; --step-active:#2BA4E8; --step-idle:#C0D9EE;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);font-size:15px;}
+
+  /* ── SCREENS ── */
+  .screen{height:100vh;display:flex;flex-direction:column;overflow:hidden;}
+  .screen.hidden{display:none!important;}
+
+  /* ── AUTH SCREENS ── */
+  .auth-bg{flex:1;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#EBF5FD 0%,#C8E8F8 100%);padding:20px;}
+  .auth-card{background:#fff;border-radius:16px;padding:40px 36px;width:400px;max-width:100%;box-shadow:0 8px 40px rgba(13,36,71,.15),0 2px 8px rgba(43,164,232,.1);}
+  .auth-logo{display:flex;align-items:center;justify-content:center;margin-bottom:28px;}
+  .auth-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .auth-sub{font-size:13px;color:var(--text-muted);margin-bottom:24px;line-height:1.5;}
+  .auth-input{width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:9px;padding:11px 14px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s,box-shadow .2s;margin-bottom:12px;display:block;}
+  .auth-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,164,232,.12);}
+  .auth-input::placeholder{color:var(--text-muted);}
+  .auth-btn{width:100%;background:var(--primary);color:#fff;border:none;border-radius:9px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;transition:all .15s;box-shadow:0 3px 12px rgba(43,164,232,.3);}
+  .auth-btn:hover{background:var(--primary-dark);transform:translateY(-1px);}
+  .auth-btn:disabled{opacity:.65;cursor:not-allowed;transform:none;}
+  .auth-hint{font-size:12px;color:var(--text-muted);margin-top:16px;text-align:center;line-height:1.6;}
+  .auth-link{font-size:12px;color:var(--text-muted);text-align:center;margin-top:10px;cursor:pointer;text-decoration:underline;text-underline-offset:2px;}
+  .auth-link:hover{color:var(--primary);}
+
+  /* ── TOPBAR (shared) ── */
+  .topbar{background:var(--surface);border-bottom:2px solid var(--primary);padding:0 20px;display:flex;align-items:center;gap:14px;flex-shrink:0;z-index:10;height:56px;box-shadow:0 2px 8px rgba(43,164,232,.12);}
+  .header-logo{display:flex;align-items:center;gap:0;user-select:none;flex-shrink:0;}
+  .logo-word{font-family:'Arial Black','Arial',sans-serif;font-weight:900;font-size:17px;letter-spacing:.5px;color:var(--text);line-height:1;}
+  .logo-icon-wrap{margin:0 7px;display:flex;align-items:center;}
+  .topbar-divider{width:1px;height:32px;background:var(--border);flex-shrink:0;}
+  .user-badge{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;color:var(--text-muted);flex-shrink:0;}
+  .user-badge strong{color:var(--text);}
+  .call-badge{display:flex;align-items:center;gap:7px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:5px 12px;font-size:13px;color:var(--text-muted);flex-shrink:0;}
+  .call-badge.active{border-color:var(--success);color:var(--success);background:#f0faf6;}
+  .call-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+  .call-badge.active .dot{background:var(--success);animation:pulse 1.5s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .timer{font-family:monospace;font-size:21px;font-weight:700;color:var(--primary);min-width:62px;flex-shrink:0;}
+  .client-info{display:flex;align-items:center;gap:10px;flex:1;}
+  .client-info input{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:6px 12px;color:var(--text);font-size:14px;width:180px;outline:none;transition:border-color .2s;}
+  .client-info input:focus{border-color:var(--primary);}
+  .client-info input::placeholder{color:var(--text-muted);}
+  .btn{padding:7px 16px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;flex-shrink:0;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-success{background:var(--success);color:#fff;}
+  .btn-success:hover{background:#0a7d5d;}
+  .btn-danger{background:var(--danger);color:#fff;}
+  .btn-danger:hover{background:#c53030;}
+  .btn-ghost{background:var(--surface2);border:1px solid var(--border);color:var(--text-muted);}
+  .btn-ghost:hover{border-color:var(--primary);color:var(--primary);}
+  .ml-auto{margin-left:auto;}
+  .icon-btn{width:36px;height:36px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:17px;transition:all .15s;flex-shrink:0;}
+  .icon-btn:hover{border-color:var(--primary);color:var(--primary);}
+
+  /* ── BOSS DASHBOARD ── */
+  .boss-wrap{flex:1;overflow-y:auto;padding:24px;}
+  .boss-section-hd{font-size:16px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+  .boss-refresh{margin-left:auto;padding:5px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;transition:all .15s;}
+  .boss-refresh:hover{border-color:var(--primary);color:var(--primary);}
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+  .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px;box-shadow:0 2px 10px rgba(43,164,232,.07);}
+  .kpi-icon{font-size:26px;margin-bottom:10px;}
+  .kpi-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--text-muted);margin-bottom:6px;}
+  .kpi-value{font-size:40px;font-weight:800;color:var(--text);line-height:1;margin-bottom:4px;}
+  .kpi-value.sm{font-size:20px;}
+  .kpi-sub{font-size:12px;color:var(--text-muted);}
+  .q-dots{display:flex;gap:5px;margin:8px 0;}
+  .q-dot{width:11px;height:11px;border-radius:50%;}
+  .q-dot.g{background:var(--success);}
+  .q-dot.a{background:#F59E0B;}
+  .q-dot.r{background:var(--danger);}
+  .q-dot.e{background:var(--border);}
+  .staff-section{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:28px;box-shadow:0 2px 10px rgba(43,164,232,.07);}
+  .st{width:100%;border-collapse:collapse;}
+  .st th{background:var(--surface2);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:12px 16px;text-align:left;border-bottom:1px solid var(--border);}
+  .st td{padding:13px 16px;font-size:14px;color:var(--text);border-bottom:1px solid var(--surface2);}
+  .st tr:last-child td{border-bottom:none;}
+  .st tbody tr:hover td{background:#F8FBFF;}
+  .sbadge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;}
+  .sbadge-g{background:rgba(12,153,112,.12);color:var(--success);}
+  .sbadge-a{background:rgba(245,158,11,.12);color:#b45309;}
+  .sbadge-r{background:rgba(229,62,62,.12);color:var(--danger);}
+  .sbadge-b{background:rgba(43,164,232,.12);color:var(--primary-dark);}
+  .sbadge-gr{background:var(--surface2);color:var(--text-muted);}
+
+  /* ── MANAGER LAYOUT ── */
+  .main{display:grid;grid-template-columns:240px 1fr 300px;flex:1;overflow:hidden;}
+  .checklist-panel{background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:16px 12px;}
+  .panel-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:12px;padding:0 4px;}
+  .steps-list{display:flex;flex-direction:column;gap:4px;}
+  .step-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:9px;cursor:pointer;border:1px solid transparent;transition:all .15s;}
+  .step-item:hover{background:var(--surface2);}
+  .step-item.active{background:var(--primary-light);border-color:var(--primary);}
+  .step-item.done .step-num{background:var(--step-done);color:#fff;}
+  .step-item.active .step-num{background:var(--step-active);color:#fff;}
+  .step-num{width:26px;height:26px;border-radius:50%;background:var(--step-idle);color:var(--text-muted);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+  .step-label{font-size:13px;line-height:1.3;color:var(--text);}
+  .step-item.done .step-label{color:var(--text-muted);}
+  .step-item.active .step-label{font-weight:600;color:var(--primary-dark);}
+  .step-check{margin-left:auto;width:18px;height:18px;border:2px solid var(--border);border-radius:4px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+  .step-item.done .step-check{background:var(--success);border-color:var(--success);}
+  .step-check::after{content:'✓';font-size:11px;color:#fff;display:none;}
+  .step-item.done .step-check::after{display:block;}
+  .progress-bar-wrap{margin-top:16px;padding:0 4px;}
+  .progress-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:6px;}
+  .progress-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:3px;transition:width .4s ease;}
+
+  /* call summary in left panel */
+  .call-smry{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+  .smry-row{display:flex;align-items:center;gap:5px;padding:5px 8px;border-radius:6px;font-size:12px;color:var(--text);}
+  .smry-row:nth-child(even){background:var(--surface2);}
+  .smry-row.smry-me{background:rgba(43,164,232,.08);font-weight:700;border:1px solid rgba(43,164,232,.2);}
+  .smry-medal{min-width:20px;font-size:13px;}
+  .smry-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .smry-count{color:var(--primary-dark);font-size:11px;flex-shrink:0;}
+
+  /* ── CENTER PANEL ── */
+  .center-panel{display:flex;flex-direction:column;overflow-y:auto;padding:22px 26px;gap:16px;background:var(--bg);}
+  .step-header{display:flex;align-items:flex-start;gap:14px;}
+  .step-icon{font-size:30px;line-height:1;flex-shrink:0;}
+  .step-title{font-size:22px;font-weight:700;color:var(--text);margin-bottom:4px;}
+  .step-desc{font-size:14px;color:var(--text-muted);line-height:1.5;}
+  .script-block{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--primary);border-radius:9px;padding:16px 18px;box-shadow:0 1px 4px rgba(43,164,232,.07);}
+  .script-block .script-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:10px;}
+  .script-block p{font-size:15px;line-height:1.65;color:var(--text);background:var(--primary-light);border-radius:7px;padding:12px 14px;font-style:italic;border:1px solid var(--border);}
+  .tips-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .tip-card{background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:14px;cursor:default;transition:all .15s;position:relative;box-shadow:0 1px 3px rgba(13,36,71,.05);}
+  .tip-card:hover{border-color:var(--primary);box-shadow:0 2px 8px rgba(43,164,232,.12);}
+  .tip-card .tip-icon{font-size:20px;margin-bottom:6px;}
+  .tip-card .tip-title{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--text);}
+  .tip-card .tip-text{font-size:12px;color:var(--text-muted);line-height:1.45;}
+  .tip-badge{position:absolute;top:8px;right:8px;font-size:10px;background:var(--primary);color:#fff;padding:2px 7px;border-radius:10px;font-weight:600;}
+  .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .form-group{display:flex;flex-direction:column;gap:5px;}
+  .form-group label{font-size:12px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px;}
+  .form-group input,.form-group select,.form-group textarea{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 12px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;resize:none;}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,164,232,.1);}
+  .radio-group{display:flex;flex-direction:column;gap:7px;}
+  .radio-option{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;font-size:14px;color:var(--text);}
+  .radio-option:hover{border-color:var(--primary);background:var(--primary-light);}
+  .radio-option.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary-dark);font-weight:600;}
+  .radio-dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .15s;}
+  .radio-option.selected .radio-dot{border-color:var(--primary);background:var(--primary);}
+  .action-bar{display:flex;gap:10px;align-items:center;padding-top:4px;}
+  .btn-next{background:var(--primary);color:#fff;padding:11px 28px;font-size:15px;font-weight:700;border-radius:9px;border:none;cursor:pointer;transition:all .15s;box-shadow:0 3px 10px rgba(43,164,232,.3);}
+  .btn-next:hover{background:var(--primary-dark);transform:translateY(-1px);}
+  .btn-skip{background:transparent;border:1px solid var(--border);color:var(--text-muted);padding:11px 18px;font-size:13px;border-radius:8px;cursor:pointer;transition:all .15s;}
+  .btn-skip:hover{border-color:var(--primary);color:var(--primary);}
+  .complaint-types{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .complaint-type{padding:13px;background:var(--surface);border:1px solid var(--border);border-radius:9px;cursor:pointer;text-align:center;font-size:13px;color:var(--text);transition:all .15s;}
+  .complaint-type:hover{border-color:var(--danger);background:#fff5f5;}
+  .complaint-type.selected{border-color:var(--danger);background:#fff5f5;color:var(--danger);font-weight:600;}
+  .complaint-type .ct-icon{font-size:22px;margin-bottom:5px;}
+  .finish-summary{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:20px;box-shadow:0 2px 8px rgba(43,164,232,.08);}
+  .summary-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .summary-item:last-child{border-bottom:none;}
+  .summary-item .si-label{color:var(--text-muted);font-size:13px;}
+  .summary-item .si-val{font-weight:600;color:var(--text);}
+  .tag{padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;}
+  .tag-green{background:rgba(12,153,112,.12);color:var(--success);}
+  .tag-amber{background:rgba(245,158,11,.12);color:#b45309;}
+  .tag-red{background:rgba(229,62,62,.12);color:var(--danger);}
+  .sheets-bar{display:flex;align-items:center;gap:10px;padding:14px 16px;background:linear-gradient(135deg,#e8f5fe,#f0f9ff);border:1px solid var(--primary);border-radius:10px;margin-top:4px;}
+  .sheets-bar .sheets-icon{font-size:26px;flex-shrink:0;}
+  .sheets-bar .sheets-label{font-size:13px;color:var(--text-muted);flex:1;line-height:1.4;}
+  .sheets-bar .sheets-label strong{color:var(--text);display:block;margin-bottom:2px;}
+
+  /* ── RIGHT PANEL ── */
+  .ref-panel{background:var(--surface);border-left:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden;}
+  .ref-tabs{display:flex;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .ref-tab{flex:1;padding:10px 4px;text-align:center;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+  .ref-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+  .ref-body{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:10px;}
+  .ref-search{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;width:100%;}
+  .ref-search:focus{border-color:var(--primary);}
+  .product-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px;transition:border-color .15s;}
+  .product-card:hover{border-color:var(--primary);}
+  .product-card .pc-name{font-size:13px;font-weight:700;margin-bottom:4px;color:var(--text);}
+  .product-card .pc-price{font-size:16px;font-weight:700;color:var(--primary-dark);margin-bottom:6px;}
+  .product-card .pc-details{font-size:12px;color:var(--text-muted);line-height:1.5;}
+  .stock-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700;margin-top:6px;}
+  .in-stock{background:rgba(12,153,112,.12);color:var(--success);}
+  .low-stock{background:rgba(245,158,11,.12);color:#b45309;}
+  .out-stock{background:rgba(229,62,62,.12);color:var(--danger);}
+  .faq-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .faq-q{padding:12px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background .15s;}
+  .faq-q:hover{background:var(--primary-light);}
+  .faq-q .arrow{transition:transform .2s;color:var(--text-muted);font-size:11px;}
+  .faq-item.open .arrow{transform:rotate(90deg);}
+  .faq-a{display:none;padding:10px 14px 12px;font-size:12px;color:var(--text-muted);line-height:1.6;border-top:1px solid var(--border);}
+  .faq-item.open .faq-a{display:block;}
+  .proc-item{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+  .proc-item .proc-title{font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text);}
+  .proc-item ol{padding-left:16px;font-size:12px;color:var(--text-muted);line-height:1.8;}
+
+  /* ── TOOLTIP ── */
+  .tooltip-wrap{position:relative;display:inline-flex;align-items:center;}
+  .tooltip-icon{display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;background:var(--primary);color:#fff;border-radius:50%;font-size:11px;cursor:pointer;font-weight:700;margin-left:6px;flex-shrink:0;}
+  .tooltip-box{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--text);border:1px solid var(--primary-dark);border-radius:8px;padding:12px 14px;width:240px;font-size:12px;color:#fff;line-height:1.5;z-index:100;box-shadow:0 8px 24px rgba(13,36,71,.25);}
+  .tooltip-wrap:hover .tooltip-box{display:block;}
+
+  /* ── NOTIFICATION ── */
+  .notif{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--primary);border-radius:11px;padding:14px 18px;font-size:14px;color:var(--text);z-index:1000;transform:translateY(80px);opacity:0;transition:all .3s ease;max-width:320px;box-shadow:0 8px 24px rgba(43,164,232,.2);}
+  .notif.show{transform:translateY(0);opacity:1;}
+  .notif .notif-title{font-weight:700;color:var(--primary);margin-bottom:4px;}
+  .notif.notif-ok{border-color:var(--success);}
+  .notif.notif-ok .notif-title{color:var(--success);}
+  .notif.notif-err{border-color:var(--danger);}
+  .notif.notif-err .notif-title{color:var(--danger);}
+
+  /* ── MODAL ── */
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,36,71,.45);z-index:500;align-items:center;justify-content:center;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border-radius:14px;padding:28px 30px;width:600px;max-width:95vw;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(13,36,71,.3);position:relative;}
+  .modal h2{font-size:20px;color:var(--text);margin-bottom:6px;}
+  .modal .modal-sub{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5;}
+  .modal-close{position:absolute;top:16px;right:16px;width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .modal-close:hover{border-color:var(--danger);color:var(--danger);}
+  .setup-steps{counter-reset:step;display:flex;flex-direction:column;gap:10px;margin-bottom:20px;}
+  .setup-step{display:flex;gap:12px;align-items:flex-start;font-size:13px;color:var(--text);padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;line-height:1.5;}
+  .setup-step-num{counter-increment:step;width:22px;height:22px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .code-block{background:var(--text);color:#a8d8f0;border-radius:9px;padding:16px;font-family:'Consolas',monospace;font-size:11.5px;line-height:1.7;overflow-x:auto;margin-bottom:16px;position:relative;max-height:280px;overflow-y:auto;}
+  .copy-btn{position:sticky;top:0;float:right;background:var(--primary);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;}
+  .copy-btn:hover{background:var(--primary-dark);}
+  .url-input-row{display:flex;gap:10px;align-items:center;}
+  .url-input-row input{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .2s;}
+  .url-input-row input:focus{border-color:var(--primary);}
+  .url-saved-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(12,153,112,.12);color:var(--success);border-radius:6px;padding:4px 10px;font-size:12px;font-weight:600;margin-top:8px;}
+
+  /* ── MISC ── */
+  ::-webkit-scrollbar{width:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+  .hidden{display:none!important;}
+  .section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:var(--text-muted);margin-bottom:8px;}
+
+  /* ── BOSS NAV TABS ── */
+  .boss-nav-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;display:flex;flex-shrink:0;gap:4px;}
+  .boss-nav-tab{padding:13px 22px;font-size:14px;font-weight:600;color:var(--text-muted);border:none;background:none;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-1px;transition:all .15s;}
+  .boss-nav-tab:hover{color:var(--primary);}
+  .boss-nav-tab.active{color:var(--primary);border-bottom-color:var(--primary);}
+
+  /* ── CALLS SECTION ── */
+  .boss-calls-wrap{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+  .calls-filter-bar{display:flex;align-items:center;gap:8px;padding:12px 20px;background:var(--surface);border-bottom:1px solid var(--border);flex-shrink:0;flex-wrap:wrap;}
+  .filter-sel,.filter-inp{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;transition:border-color .2s;}
+  .filter-sel:focus,.filter-inp:focus{border-color:var(--primary);}
+  .filter-date-sep{font-size:12px;color:var(--text-muted);flex-shrink:0;}
+  .calls-table-outer{flex:1;overflow:auto;}
+  .calls-table{width:100%;border-collapse:collapse;min-width:1100px;}
+  .calls-table thead th{background:var(--surface);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:11px 12px;text-align:left;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:2;white-space:nowrap;box-shadow:0 1px 0 var(--border);}
+  .calls-table tbody tr:nth-child(odd) td{background:#fff;}
+  .calls-table tbody tr:nth-child(even) td{background:var(--surface2);}
+  .calls-table tbody tr:hover td{background:var(--primary-light);}
+  .calls-table td{padding:9px 12px;font-size:13px;color:var(--text);border-bottom:1px solid #edf4fb;white-space:nowrap;vertical-align:middle;}
+  .td-ts{font-size:11.5px;color:var(--text-muted);}
+  .td-phone{font-family:monospace;font-size:12px;}
+  .td-c{text-align:center;}
+  .td-notes{white-space:normal;max-width:180px;font-size:12px;color:var(--text-muted);}
+  .calls-count-bar{padding:9px 20px;font-size:12px;color:var(--text-muted);background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:8px;}
+  .calls-empty{padding:60px;text-align:center;color:var(--text-muted);font-size:14px;}
+  .calls-loading{padding:60px;text-align:center;color:var(--text-muted);}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN: LOGIN ═══ -->
+<div id="screenLogin" class="screen">
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-word">ПИТЕР</span>
+        <div class="logo-icon-wrap">
+          <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="#2BA4E8"/>
+            <line x1="9" y1="20" x2="6" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="14" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+            <line x1="19.5" y1="21" x2="20.5" y2="21" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="26" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+            <line x1="31" y1="20" x2="34" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="logo-word">ОПТИКА</span>
+      </div>
+      <div class="auth-title">Вход в систему</div>
+      <div class="auth-sub">Авторизуйтесь, чтобы продолжить работу</div>
+      <input class="auth-input" id="loginUsername" type="text" placeholder="Имя пользователя"
+        onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()" />
+      <input class="auth-input" id="loginPassword" type="password" placeholder="Пароль"
+        onkeydown="if(event.key==='Enter')handleLogin()" />
+      <button class="auth-btn" id="loginBtn" onclick="handleLogin()">Войти</button>
+      <div class="auth-hint">При первом входе введите логин <strong>Начальник</strong> и оставьте пароль пустым</div>
+      <div class="auth-link" onclick="openSetup()">⚙ Настройка скрипта Google Apps</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: SET PASSWORD ═══ -->
+<div id="screenSetPass" class="screen hidden">
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">
+        <span class="logo-word">ПИТЕР</span>
+        <div class="logo-icon-wrap">
+          <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+            <rect width="40" height="40" rx="10" fill="#2BA4E8"/>
+            <line x1="9" y1="20" x2="6" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+            <ellipse cx="14" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+            <line x1="19.5" y1="21" x2="20.5" y2="21" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+            <ellipse cx="26" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+            <line x1="31" y1="20" x2="34" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <span class="logo-word">ОПТИКА</span>
+      </div>
+      <div class="auth-title" id="setPassWelcome">Добро пожаловать!</div>
+      <div class="auth-sub">Первый вход — установите пароль для вашего аккаунта</div>
+      <input class="auth-input" id="newPassword" type="password" placeholder="Новый пароль (мин. 4 символа)"
+        onkeydown="if(event.key==='Enter')document.getElementById('newPassword2').focus()" />
+      <input class="auth-input" id="newPassword2" type="password" placeholder="Повторите пароль"
+        onkeydown="if(event.key==='Enter')handleSetPassword()" />
+      <button class="auth-btn" id="setPassBtn" onclick="handleSetPassword()">Установить пароль</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN: BOSS ═══ -->
+<div id="screenBoss" class="screen hidden">
+  <div class="topbar">
+    <div class="header-logo">
+      <span class="logo-word">ПИТЕР</span>
+      <div class="logo-icon-wrap">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#2BA4E8"/>
+          <line x1="9" y1="20" x2="6" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="14" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+          <line x1="19.5" y1="21" x2="20.5" y2="21" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <ellipse cx="26" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+          <line x1="31" y1="20" x2="34" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="logo-word">ОПТИКА</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="user-badge">👤 <strong id="bossUserName"></strong></div>
+    <div style="flex:1"></div>
+    <button class="btn btn-primary" onclick="openAddUserModal()">➕ Добавить сотрудника</button>
+    <a id="bossSheetLink" class="btn btn-ghost" href="#" target="_blank" rel="noopener"
+       style="text-decoration:none;display:flex;align-items:center;gap:5px;">📊 Таблица</a>
+    <div class="icon-btn" onclick="openSetup()" title="Настройки">⚙</div>
+    <div class="icon-btn" onclick="logout()" title="Выйти">↪</div>
+  </div>
+  <div class="boss-nav-bar">
+    <button class="boss-nav-tab active" id="tabDashboard" onclick="switchBossTab('dashboard')">📊 Дашборд</button>
+    <button class="boss-nav-tab" id="tabCalls" onclick="switchBossTab('calls')">📋 Все звонки</button>
+  </div>
+  <div class="boss-wrap" id="bossDashSection">
+    <div style="padding:40px;text-align:center;color:var(--text-muted)">⏳ Загружаем данные...</div>
+  </div>
+  <div class="boss-calls-wrap hidden" id="bossCallsSection"></div>
+</div>
+
+<!-- ═══ SCREEN: MANAGER ═══ -->
+<div id="screenManager" class="screen hidden">
+  <div class="topbar">
+    <div class="header-logo">
+      <span class="logo-word">ПИТЕР</span>
+      <div class="logo-icon-wrap">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <rect width="40" height="40" rx="10" fill="#2BA4E8"/>
+          <line x1="9" y1="20" x2="6" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+          <ellipse cx="14" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+          <line x1="19.5" y1="21" x2="20.5" y2="21" stroke="white" stroke-width="2.4" stroke-linecap="round"/>
+          <ellipse cx="26" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/>
+          <line x1="31" y1="20" x2="34" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="logo-word">ОПТИКА</span>
+    </div>
+    <div class="topbar-divider"></div>
+    <div class="call-badge" id="callBadge">
+      <div class="dot"></div>
+      <span id="callStatus">Ожидание звонка</span>
+    </div>
+    <div class="timer" id="timer">00:00</div>
+    <div class="user-badge">👤 <strong id="managerUserBadge"></strong></div>
+    <div class="client-info">
+      <input type="text" id="clientName" placeholder="Имя клиента" />
+      <input type="text" id="clientPhone" placeholder="+7 (___) ___-__-__" style="width:155px;" />
+    </div>
+    <button class="btn btn-success ml-auto" id="startCallBtn" onclick="startCall()">▶ Начать звонок</button>
+    <button class="btn btn-danger hidden" id="endCallBtn" onclick="endCall()">■ Завершить</button>
+    <div class="icon-btn" onclick="logout()" title="Выйти">↪</div>
+  </div>
+  <div class="main">
+    <div class="checklist-panel">
+      <div class="panel-title">Чек-лист звонка</div>
+      <div class="steps-list" id="stepsList"></div>
+      <div class="progress-bar-wrap">
+        <div class="progress-label"><span>Прогресс</span><span id="progressLabel">0 / 6</span></div>
+        <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      </div>
+      <div class="call-smry">
+        <div class="panel-title">Звонки команды</div>
+        <div id="callSummaryList"><div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center">Загрузка...</div></div>
+      </div>
+    </div>
+    <div class="center-panel" id="centerPanel"></div>
+    <div class="ref-panel">
+      <div class="ref-tabs">
+        <div class="ref-tab active" onclick="switchRefTab(this,'products')">Товары</div>
+        <div class="ref-tab" onclick="switchRefTab(this,'faq')">FAQ</div>
+        <div class="ref-tab" onclick="switchRefTab(this,'procedures')">Процедуры</div>
+      </div>
+      <div class="ref-body" id="refBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SETUP MODAL ═══ -->
+<div class="modal-overlay" id="setupModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeSetup()">✕</div>
+    <h2>⚙ Настройка Google Apps Script</h2>
+    <div class="modal-sub">Система авторизации и сохранение звонков работают через Google Apps Script. Нужно один раз настроить.</div>
+    <div class="setup-steps">
+      <div class="setup-step"><div class="setup-step-num">1</div><div>Откройте Google Таблицу → меню <strong>Расширения → Apps Script</strong></div></div>
+      <div class="setup-step"><div class="setup-step-num">2</div><div>Полностью замените весь код скриптом ниже. Нажмите <strong>Сохранить (Ctrl+S)</strong></div></div>
+      <div class="setup-step"><div class="setup-step-num">3</div><div><strong>Развернуть → Управление развёртываниями → ✏ → Новая версия</strong>. Доступ: <strong>«Все»</strong> (не «с аккаунтом Google»!). Нажмите Обновить</div></div>
+      <div class="setup-step"><div class="setup-step-num">4</div><div>Скопируйте URL веб-приложения (...script.google.com/macros/s/.../exec) и вставьте ниже</div></div>
+    </div>
+    <div class="section-label" style="margin-bottom:6px">ID таблицы Google Sheets</div>
+    <div style="display:flex;gap:10px;margin-bottom:16px">
+      <input type="text" id="sheetIdInput" class="url-input-row" style="flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text);font-size:14px;font-family:inherit;outline:none;"
+        placeholder="1_h1C8aALXxYyxPGyMabAPCuXlPqrMHp7tOsic_yckeg" oninput="updateScriptCode()" />
+    </div>
+    <div class="section-label" style="margin-bottom:8px">Код Apps Script</div>
+    <div class="code-block">
+      <button class="copy-btn" onclick="copyScript()">Копировать</button>
+      <pre id="scriptCode" style="white-space:pre;overflow-x:auto;margin-top:4px"></pre>
+    </div>
+    <div class="section-label" style="margin-bottom:8px">URL веб-приложения</div>
+    <div class="url-input-row">
+      <input type="url" id="sheetsUrlInput" placeholder="https://script.google.com/macros/s/.../exec" />
+      <button class="btn btn-primary" onclick="saveScriptUrl()">Сохранить</button>
+    </div>
+    <div id="urlSavedBadge" class="url-saved-badge hidden">✓ Настройки сохранены</div>
+  </div>
+</div>
+
+<!-- ═══ ADD USER MODAL ═══ -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal" style="width:420px;max-width:95vw">
+    <div class="modal-close" onclick="closeAddUserModal()">✕</div>
+    <h2>➕ Добавить сотрудника</h2>
+    <div class="modal-sub">Сотрудник установит пароль при первом входе в систему.</div>
+    <div class="form-group">
+      <label>Имя сотрудника</label>
+      <input type="text" id="newUserName" placeholder="Иван Иванов"
+        onkeydown="if(event.key==='Enter')submitAddUser()" />
+    </div>
+    <div class="form-group" style="margin-top:12px">
+      <label>Роль</label>
+      <select id="newUserRole">
+        <option value="manager">Менеджер</option>
+        <option value="boss">Начальник</option>
+      </select>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary" id="addUserBtn" onclick="submitAddUser()">Добавить</button>
+      <button class="btn btn-ghost" onclick="closeAddUserModal()">Отмена</button>
+    </div>
+    <div id="addUserResult" style="margin-top:12px;font-size:13px;display:none;line-height:1.5"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATION -->
+<div class="notif" id="notif">
+  <div class="notif-title" id="notifTitle"></div>
+  <div id="notifMsg"></div>
+</div>
+
+<script>
+/* ══════════ DATA ══════════ */
+const STEPS = [
+  { id:1, icon:'👋', label:'Приветствие', desc:'Представьтесь и идентифицируйте клиента. Создайте позитивный первый контакт.', script:'Добрый день! Питер Оптика, меня зовут [Ваше имя]. Чем могу помочь?', tips:[{icon:'😊',title:'Тон голоса',text:'Улыбайтесь — это слышно. Говорите чётко, не торопитесь.',badge:'Важно'},{icon:'📝',title:'Записывайте',text:'Сразу занесите имя клиента — обращайтесь по имени в течение звонка.'},{icon:'⏱️',title:'Время ответа',text:'Отвечайте не позже 3-го гудка. Норма KPI — 95% звонков.'},{icon:'🔇',title:'Тишина',text:'Убедитесь, что нет посторонних шумов. Закройте лишние вкладки.'}] },
+  { id:2, icon:'🔍', label:'Выяснение потребности', desc:'Определите, с каким вопросом обратился клиент. Используйте открытые вопросы.', script:'Расскажите, что вас интересует? Вы хотите подобрать очки, линзы, или у вас другой вопрос?', tips:[{icon:'❓',title:'Открытые вопросы',text:'Задавайте вопросы «Что?», «Как?», «Расскажите...» — клиент раскрывается.'},{icon:'👂',title:'Активное слушание',text:'Не перебивайте. Повторите ключевые слова: «Я вас правильно понял...»'},{icon:'🎯',title:'Уточнение',text:'Выясните: для кого (себе/ребёнку/подарок), когда нужно, был ли у офтальмолога.',badge:'Ключевой шаг'},{icon:'📋',title:'Категории',text:'Очки / линзы / солнцезащитные / аксессуары / жалоба / запись на приём.'}], hasRadio:true, radioLabel:'Тема обращения:', radioOptions:[{id:'glasses',emoji:'👓',label:'Очки / оправы'},{id:'lenses',emoji:'🔬',label:'Контактные линзы'},{id:'sun',emoji:'🕶️',label:'Солнцезащитные'},{id:'accessories',emoji:'🛍️',label:'Аксессуары'},{id:'complaint',emoji:'⚠️',label:'Жалоба / претензия'},{id:'appointment',emoji:'📅',label:'Запись на проверку зрения'}] },
+  { id:3, icon:'💬', label:'Консультация', desc:'Предоставьте клиенту всю необходимую информацию. Предложите варианты, ответьте на вопросы.', script:'По вашему запросу могу предложить следующие варианты... Хотите узнать подробнее о каком-то конкретном?', tips:[{icon:'📚',title:'Знание продукта',text:'Используйте правую панель для быстрого поиска по ассортименту и ценам.',badge:'Подсказка'},{icon:'💡',title:'Выгода клиента',text:'Говорите не о характеристиках, а о пользе: не «UV400», а «защита от ультрафиолета».'},{icon:'🔄',title:'Перемещение',text:'Товара нет в наличии? Предложите перемещение из другого салона (до 2 дней).'},{icon:'💰',title:'Цены',text:'Называйте цену уверенно. При возражении — предложите рассрочку 0%.'}], hasConsultForm:true },
+  { id:4, icon:'⚠️', label:'Обработка жалобы', desc:'Зафиксируйте жалобу, выразите понимание и предложите решение.', script:'Я вас понимаю, это неприятная ситуация. Давайте разберёмся — я обязательно помогу вам решить этот вопрос.', tips:[{icon:'🤝',title:'Не спорьте',text:'Никогда не оспаривайте и не перебивайте. Дайте клиенту выговориться.'},{icon:'📋',title:'Фиксируйте',text:'Заполните форму жалобы — обязательный шаг. Номер жалобы — клиенту.',badge:'Обязательно'},{icon:'⏰',title:'Сроки',text:'Ответ клиенту: до 3 рабочих дней. Сложные случаи — до 10 дней.'},{icon:'🎁',title:'Лояльность',text:'При серьёзной жалобе — предложите скидку 10% (при наличии полномочий).'}], hasComplaintForm:true },
+  { id:5, icon:'📅', label:'Запись на проверку зрения', desc:'Запишите клиента к офтальмологу или оптометристу. Уточните удобный салон и время.', script:'Хотите, я запишу вас прямо сейчас? Это займёт буквально минуту. Какой салон удобнее — на Ленина или на Мира?', tips:[{icon:'📍',title:'Салоны',text:'Приём в 3 салонах: Ленина 12, Мира 45, ТЦ Галактика 2й этаж.',badge:'Инфо'},{icon:'🕐',title:'Расписание',text:'Пн-Пт: 9:00–20:00, Сб-Вс: 10:00–18:00. Врач — каждый день кроме воскресенья.'},{icon:'📞',title:'Напоминание',text:'SMS отправляется автоматически за день. Уточните номер телефона.'},{icon:'⚕️',title:'Что взять',text:'Предыдущие очки (если есть) и документ, удостоверяющий личность.'}], hasAppointmentForm:true },
+  { id:6, icon:'✅', label:'Завершение звонка', desc:'Подведите итоги, убедитесь что клиент получил ответы на все вопросы. Попрощайтесь.', script:'Я ответил на все ваши вопросы? Если возникнут ещё — звоните, мы всегда рады помочь. Хорошего вам дня!', tips:[{icon:'✔️',title:'Резюме',text:'Кратко повторите: что договорились, когда ждать, что нужно клиенту.'},{icon:'😊',title:'Позитивный финал',text:'Последнее впечатление важно. Улыбайтесь и звучите энергично до конца.'},{icon:'📊',title:'Заполните итоги',text:'После завершения — заполните карточку звонка (до 5 минут).',badge:'Обязательно'},{icon:'🔔',title:'Перезвонить',text:'Если обещали что-то уточнить — поставьте напоминание не позже 2 часов.'}], hasSummary:true }
+];
+
+const PRODUCTS = [
+  {name:'Очки Ray-Ban RB3025 Aviator',price:'12 900 ₽',details:'Линзы: поляризованные G-15\nМатериал: металл, золото\nФорма: авиатор',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Оправа Silhouette Momentum',price:'18 500 ₽',details:'Сверхлёгкий дизайн без шарниров\nМатериал: SPX+\nВес: 1,6 г',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Линзы Essilor Varilux X-Series',price:'8 400 ₽',details:'Прогрессивные\nПокрытие: Crizal Sapphire\nIndex: 1.67',stock:'low',stockLabel:'2 пары в наличии'},
+  {name:'Линзы Acuvue Oasys (6 шт)',price:'1 850 ₽',details:'Двухнедельные\nDia: 14.0 мм\nSph: от -1.00 до -6.00',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Линзы Air Optix Aqua (3 шт)',price:'1 240 ₽',details:'Ежемесячные\nSilicone hydrogel\nDia: 14.2 мм',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Очки Oakley Holbrook',price:'9 700 ₽',details:'Солнцезащитные\nUV400 защита\nПоляризация: опция',stock:'out',stockLabel:'Нет в наличии'},
+  {name:'Раствор Biotrue 300 мл',price:'680 ₽',details:'Многофункциональный раствор\nДля мягких линз\nPh=7.5',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Футляр для очков (кожзам)',price:'390 ₽',details:'Размер: 16 × 7 × 4 см\nЦвета: чёрный, коричневый, синий',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Линзы Zeiss DriveSafe',price:'6 200 ₽',details:'Однофокальные\nIndex: 1.6\nAnti-reflective покрытие',stock:'in',stockLabel:'Есть в наличии'},
+  {name:'Детские очки Nano Vista',price:'3 800 ₽',details:'Материал: Mipan (гибкий)\nВозраст: 4–8 лет\nГарантия: 2 года',stock:'low',stockLabel:'1 в наличии'},
+];
+
+const FAQS = [
+  {q:'Какой срок изготовления очков?',a:'Стандарт: 5–7 рабочих дней. Срочно (экспресс): 1–2 дня (+30% к стоимости). При наличии стандартных линз — от 1 часа.'},
+  {q:'Как оформить возврат или обмен?',a:'Очки по рецепту возврату не подлежат (ст. 25 ЗоЗПП). Аксессуары — в течение 14 дней при сохранении упаковки. Дефект производителя — гарантийный ремонт/замена.'},
+  {q:'Какие документы нужны для записи?',a:'Паспорт или другой документ. Для детей — свидетельство о рождении и паспорт родителя. Желательно принести старые очки.'},
+  {q:'Возможна ли рассрочка?',a:'Да, рассрочка 0% через Тинькофф или СберБанк на 3–12 месяцев. Минимальная сумма — 3 000 ₽. Оформление на месте за 10–15 минут.'},
+  {q:'Как перевести товар из другого салона?',a:'Срок перемещения: 1–2 рабочих дня. Резервируем до 5 дней. Уведомление по SMS. Стоимость перемещения — бесплатно.'},
+  {q:'Контактные линзы: как выбрать замену?',a:'Нужен рецепт от офтальмолога. Если есть старые линзы — попросить назвать параметры (Sph, Cyl, Axis, BC, Dia). Подберём аналог.'},
+  {q:'Скидки и акции: что действует сейчас?',a:'Карта лояльности: 5%. При покупке 2+ пар оправ — скидка 20% на вторую. Понедельник: -15% на контактные линзы. Пенсионерам — 5%.'},
+];
+
+const PROCEDURES = [
+  {title:'Перемещение товара между салонами',steps:['Уточнить наличие в системе (CRM → остатки)','Согласовать с клиентом адрес и срок (1–2 дня)','Оформить заявку: Склад → Перемещение → Новая заявка','Указать артикул, количество, откуда/куда','Клиенту придёт SMS-уведомление о готовности','Зарезервировать товар на 5 дней']},
+  {title:'Оформление жалобы в системе',steps:['CRM → Обращения → Новое обращение','Категория: товар / сервис / доставка / другое','Описание: зафиксировать слова клиента дословно','Приоритет: Средний (стандарт) / Высокий (конфликт)','Назначить ответственного (руководитель смены)','Сообщить клиенту номер обращения для отслеживания']},
+  {title:'Запись на приём к офтальмологу',steps:['CRM → Записи → Новая запись','Выбрать салон и дату/время из доступных слотов','Указать имя и телефон клиента','Уточнить: первичный или повторный визит','При необходимости — добавить комментарий для врача','Подтверждение SMS отправляется автоматически']},
+];
+
+/* ══════════ APP STATE ══════════ */
+const STORAGE_KEY = 'piteroptica_sheets_url';
+const SHEET_ID_KEY = 'piteroptica_sheet_id';
+const DEFAULT_SHEET_ID = '1_h1C8aALXxYyxPGyMabAPCuXlPqrMHp7tOsic_yckeg';
+
+const app = {
+  session: null,
+  pendingUser: null,
+  pendingRole: null,
+  scriptUrl: localStorage.getItem(STORAGE_KEY) || '',
+  sheetId: localStorage.getItem(SHEET_ID_KEY) || DEFAULT_SHEET_ID,
+};
+
+let state = {
+  callActive:false, timerSeconds:0, timerInterval:null,
+  currentStep:1, completedSteps:new Set(),
+  callType:null, appointmentData:{}, complaintData:{}, consultData:{},
+};
+
+/* ══════════ SHA-256 ══════════ */
+async function sha256(str) {
+  if (!str) return '';
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+/* ══════════ API ══════════ */
+async function api(params) {
+  if (!app.scriptUrl) { openSetup(); throw new Error('URL скрипта не настроен'); }
+  const res = await fetch(`${app.scriptUrl}?${new URLSearchParams(params)}`);
+  const data = await res.json();
+  if (data.error) {
+    if (data.error === 'Не авторизован') logout();
+    throw new Error(data.error);
+  }
+  return data;
+}
+
+/* ══════════ SCREENS ══════════ */
+function showScreen(id) {
+  ['screenLogin','screenSetPass','screenBoss','screenManager'].forEach(s =>
+    document.getElementById(s).classList.toggle('hidden', s !== id));
+}
+
+/* ══════════ AUTH ══════════ */
+async function handleLogin() {
+  const username = document.getElementById('loginUsername').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  if (!username) { showNotif('Введите имя пользователя', '', 'err'); return; }
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true; btn.textContent = '⏳ Входим...';
+  try {
+    const passwordHash = await sha256(password);
+    const data = await api({action:'login', username, passwordHash});
+    if (data.status === 'first_login') {
+      app.pendingUser = data.username;
+      app.pendingRole = data.role;
+      document.getElementById('setPassWelcome').textContent = `Добро пожаловать, ${data.username}!`;
+      showScreen('screenSetPass');
+      document.getElementById('newPassword').focus();
+    } else {
+      app.session = {token:data.token, username:data.username, role:data.role, expires:Date.now()+8*3600*1000};
+      sessionStorage.setItem('po_session', JSON.stringify(app.session));
+      enterApp();
+    }
+  } catch(e) { showNotif('Ошибка входа', e.message, 'err'); }
+  btn.disabled = false; btn.textContent = 'Войти';
+}
+
+async function handleSetPassword() {
+  const p1 = document.getElementById('newPassword').value;
+  const p2 = document.getElementById('newPassword2').value;
+  if (p1.length < 4) { showNotif('Пароль слишком короткий', 'Минимум 4 символа', 'err'); return; }
+  if (p1 !== p2) { showNotif('Пароли не совпадают', '', 'err'); return; }
+  const btn = document.getElementById('setPassBtn');
+  btn.disabled = true; btn.textContent = '⏳ Сохраняем...';
+  try {
+    const passwordHash = await sha256(p1);
+    const data = await api({action:'setPassword', username:app.pendingUser, passwordHash});
+    app.session = {token:data.token, username:data.username, role:data.role, expires:Date.now()+8*3600*1000};
+    sessionStorage.setItem('po_session', JSON.stringify(app.session));
+    app.pendingUser = null; app.pendingRole = null;
+    enterApp();
+  } catch(e) { showNotif('Ошибка', e.message, 'err'); }
+  btn.disabled = false; btn.textContent = 'Установить пароль';
+}
+
+function enterApp() {
+  if (app.session.role === 'boss') {
+    document.getElementById('bossUserName').textContent = app.session.username;
+    document.getElementById('bossSheetLink').href = `https://docs.google.com/spreadsheets/d/${app.sheetId}/edit`;
+    showScreen('screenBoss');
+    loadBossDashboard();
+  } else {
+    document.getElementById('managerUserBadge').textContent = app.session.username;
+    showScreen('screenManager');
+    resetCall();
+    renderRefPanel('products');
+    loadCallSummary();
+  }
+}
+
+function logout() {
+  app.session = null; app.pendingUser = null;
+  sessionStorage.removeItem('po_session');
+  document.getElementById('loginUsername').value = '';
+  document.getElementById('loginPassword').value = '';
+  showScreen('screenLogin');
+}
+
+/* ══════════ BOSS DASHBOARD ══════════ */
+function switchBossTab(tab) {
+  const isDash = tab === 'dashboard';
+  document.getElementById('bossDashSection').classList.toggle('hidden', !isDash);
+  document.getElementById('bossCallsSection').classList.toggle('hidden', isDash);
+  document.getElementById('tabDashboard').classList.toggle('active', isDash);
+  document.getElementById('tabCalls').classList.toggle('active', !isDash);
+  if (!isDash && !callsInitialized) initCallsSection();
+}
+
+async function loadBossDashboard() {
+  const content = document.getElementById('bossDashSection');
+  content.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">⏳ Загружаем данные...</div>';
+  try {
+    const [statsRes, usersRes] = await Promise.all([
+      api({action:'getStats', token:app.session.token}),
+      api({action:'getUsers', token:app.session.token})
+    ]);
+    renderBossDashboard(statsRes, usersRes.users);
+  } catch(e) {
+    content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--danger)">❌ ${e.message}</div>`;
+  }
+}
+
+function renderBossDashboard(stats, users) {
+  const content = document.getElementById('bossDashSection');
+  const qVal = stats.avgQuality || 0;
+  const qLabel = qVal >= 2.5 ? 'Отлично' : qVal >= 1.5 ? 'Хорошо' : qVal > 0 ? 'Требует внимания' : 'Нет данных';
+  const qColor = qVal >= 2.5 ? 'var(--success)' : qVal >= 1.5 ? '#b45309' : qVal > 0 ? 'var(--danger)' : 'var(--text-muted)';
+
+  function qdots(v) {
+    const cnt = v >= 2.5 ? 3 : v >= 1.5 ? 2 : v > 0 ? 1 : 0;
+    const cls = v >= 2.5 ? 'g' : v >= 1.5 ? 'a' : 'r';
+    return Array.from({length:3}).map((_,i) => `<div class="q-dot ${i<cnt?cls:'e'}"></div>`).join('');
+  }
+
+  function miniChart(last7) {
+    if (!last7 || !last7.length) return '<div style="color:var(--text-muted);font-size:12px;padding:8px 0">Нет данных</div>';
+    const max = Math.max(...last7.map(d=>d.count), 1);
+    const bars = last7.map((d,i) => {
+      const h = Math.max(Math.round(d.count/max*36), d.count>0?3:0);
+      return `<rect x="${i*18+2}" y="${38-h}" width="13" height="${h}" rx="2" fill="${d.count===max&&max>0?'#2BA4E8':'#C0D9EE'}"/>`;
+    }).join('');
+    return `<svg width="128" height="40" viewBox="0 0 128 40" style="display:block;margin:8px 0">${bars}</svg>`;
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+  const mgrs = stats.managers || [];
+  const qCls = v => parseFloat(v)>=2.5?'sbadge-g':parseFloat(v)>=1.5?'sbadge-a':parseFloat(v)>0?'sbadge-r':'sbadge-gr';
+  const qLbl = v => parseFloat(v)>=2.5?'Отлично':parseFloat(v)>=1.5?'Хорошо':parseFloat(v)>0?'Неполный':'—';
+
+  content.innerHTML = `
+    <div style="display:flex;align-items:center;margin-bottom:20px">
+      <div class="boss-section-hd" style="margin-bottom:0">📊 Дашборд</div>
+      <button class="boss-refresh" onclick="loadBossDashboard()">🔄 Обновить</button>
+    </div>
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon">📞</div>
+        <div class="kpi-label">Звонки сегодня</div>
+        <div class="kpi-value">${stats.todayCalls||0}</div>
+        <div class="kpi-sub">за текущий день</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">⭐</div>
+        <div class="kpi-label">Качество звонков</div>
+        <div class="q-dots">${qdots(qVal)}</div>
+        <div class="kpi-value sm" style="color:${qColor}">${qLabel}</div>
+        <div class="kpi-sub">ср. балл: ${qVal||'—'}</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">🏆</div>
+        <div class="kpi-label">Лидер</div>
+        ${stats.topManager
+          ? `<div class="kpi-value sm">${stats.topManager.name}</div><div class="kpi-sub">${stats.topManager.total} всего · ${stats.topManager.today} сегодня</div>`
+          : '<div class="kpi-sub" style="margin-top:10px">Нет данных</div>'}
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon">📈</div>
+        <div class="kpi-label">7 дней</div>
+        ${miniChart(stats.last7)}
+        <div class="kpi-sub">${stats.last7&&stats.last7.length>=2?`Вчера: ${stats.last7[stats.last7.length-2].count} зв.`:''}</div>
+      </div>
+    </div>
+
+    <div class="boss-section-hd">👥 Рейтинг менеджеров</div>
+    <div class="staff-section" style="margin-bottom:28px">
+      <table class="st">
+        <thead><tr><th>Место</th><th>Менеджер</th><th>Всего</th><th>Сегодня</th><th>Качество</th></tr></thead>
+        <tbody>${mgrs.length ? mgrs.map((m,i)=>`<tr>
+          <td style="font-size:20px">${medals[i]||`${i+1}.`}</td>
+          <td><strong>${m.name}</strong></td>
+          <td>${m.total}</td><td>${m.today}</td>
+          <td><span class="sbadge ${qCls(m.avg)}">${qLbl(m.avg)}</span></td>
+        </tr>`).join('') : '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text-muted)">Нет данных о звонках</td></tr>'}</tbody>
+      </table>
+    </div>
+
+    <div style="display:flex;align-items:center;margin-bottom:16px">
+      <div class="boss-section-hd" style="margin-bottom:0">👤 Сотрудники</div>
+      <button class="btn btn-primary" style="margin-left:14px;padding:6px 14px;font-size:13px" onclick="openAddUserModal()">➕ Добавить</button>
+    </div>
+    <div class="staff-section">
+      <table class="st">
+        <thead><tr><th>Имя</th><th>Роль</th><th>Пароль</th><th>Создан</th></tr></thead>
+        <tbody>${users&&users.length ? users.map(u=>`<tr>
+          <td>${u.name}</td>
+          <td>${u.role==='boss'?'<span class="sbadge sbadge-b">Начальник</span>':'<span class="sbadge sbadge-gr">Менеджер</span>'}</td>
+          <td style="font-size:12px;${u.hasPass?'color:var(--success)':'color:var(--danger)'}">${u.hasPass?'✓ Задан':'⚠ Не задан'}</td>
+          <td style="font-size:12px;color:var(--text-muted)">${u.created||''}</td>
+        </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">Нет пользователей</td></tr>'}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ══════════ ADD USER MODAL ══════════ */
+function openAddUserModal() {
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserRole').value = 'manager';
+  document.getElementById('addUserResult').style.display = 'none';
+  document.getElementById('addUserModal').classList.add('open');
+  setTimeout(() => document.getElementById('newUserName').focus(), 50);
+}
+function closeAddUserModal() { document.getElementById('addUserModal').classList.remove('open'); }
+async function submitAddUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  if (!name) { showNotif('Введите имя сотрудника', '', 'err'); return; }
+  const role = document.getElementById('newUserRole').value;
+  const btn = document.getElementById('addUserBtn');
+  btn.disabled = true; btn.textContent = '⏳ Добавляем...';
+  const res = document.getElementById('addUserResult');
+  try {
+    await api({action:'addUser', token:app.session.token, newUsername:name, newRole:role});
+    res.style.display = 'block'; res.style.color = 'var(--success)';
+    res.innerHTML = `✓ Сотрудник <strong>${name}</strong> добавлен. Пусть войдёт с пустым паролем — установит свой.`;
+    showNotif('Сотрудник добавлен', name, 'ok');
+    setTimeout(() => { closeAddUserModal(); loadBossDashboard(); }, 2200);
+  } catch(e) {
+    res.style.display = 'block'; res.style.color = 'var(--danger)';
+    res.textContent = e.message;
+  }
+  btn.disabled = false; btn.textContent = 'Добавить';
+}
+document.getElementById('addUserModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeAddUserModal(); });
+
+/* ══════════ CALL SUMMARY (MANAGER) ══════════ */
+async function loadCallSummary() {
+  if (!app.session) return;
+  const el = document.getElementById('callSummaryList');
+  if (!el) return;
+  try {
+    const data = await api({action:'getSummary', token:app.session.token});
+    if (!data.summary || !data.summary.length) {
+      el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center">Пока нет звонков</div>';
+      return;
+    }
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = data.summary.map((s,i) => {
+      const me = s.name === app.session.username;
+      return `<div class="smry-row${me?' smry-me':''}">
+        <span class="smry-medal">${medals[i]||`${i+1}.`}</span>
+        <span class="smry-name">${s.name}</span>
+        <span class="smry-count">сег: ${s.today} / ${s.total}</span>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    if (el) el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">—</div>';
+  }
+}
+
+/* ══════════ TIMER ══════════ */
+function startCall() {
+  if (state.callActive) return;
+  state.callActive = true; state.timerSeconds = 0;
+  state.currentStep = 1; state.completedSteps = new Set();
+  state.callType = null; state.appointmentData = {}; state.complaintData = {}; state.consultData = {};
+  document.getElementById('callBadge').classList.add('active');
+  document.getElementById('callStatus').textContent = 'Звонок активен';
+  document.getElementById('startCallBtn').classList.add('hidden');
+  document.getElementById('endCallBtn').classList.remove('hidden');
+  state.timerInterval = setInterval(() => {
+    state.timerSeconds++;
+    const m = String(Math.floor(state.timerSeconds/60)).padStart(2,'0');
+    const s = String(state.timerSeconds%60).padStart(2,'0');
+    document.getElementById('timer').textContent = m+':'+s;
+  }, 1000);
+  renderChecklist(); renderStep(1);
+  showNotif('Звонок начат', 'Следуйте чек-листу — он поможет не упустить ни одного шага.', 'ok');
+}
+
+function endCall() {
+  if (!state.callActive) return;
+  clearInterval(state.timerInterval); state.callActive = false;
+  document.getElementById('callBadge').classList.remove('active');
+  document.getElementById('callStatus').textContent = 'Ожидание звонка';
+  document.getElementById('startCallBtn').classList.remove('hidden');
+  document.getElementById('endCallBtn').classList.add('hidden');
+  showNotif('Звонок завершён', `Длительность: ${document.getElementById('timer').textContent}`, 'ok');
+  renderStep(6);
+}
+
+/* ══════════ CHECKLIST ══════════ */
+function renderChecklist() {
+  const list = document.getElementById('stepsList');
+  list.innerHTML = '';
+  STEPS.forEach(step => {
+    const done = state.completedSteps.has(step.id);
+    const active = state.currentStep === step.id;
+    const div = document.createElement('div');
+    div.className = `step-item${done?' done':''}${active?' active':''}`;
+    div.innerHTML = `<div class="step-num">${done?'✓':step.id}</div><div class="step-label">${step.label}</div><div class="step-check" onclick="toggleStep(event,${step.id})"></div>`;
+    div.onclick = e => { if (!e.target.classList.contains('step-check')) { state.currentStep=step.id; renderChecklist(); renderStep(step.id); } };
+    list.appendChild(div);
+  });
+  updateProgress();
+}
+
+function toggleStep(e, stepId) {
+  e.stopPropagation();
+  if (state.completedSteps.has(stepId)) state.completedSteps.delete(stepId);
+  else state.completedSteps.add(stepId);
+  renderChecklist();
+}
+
+function updateProgress() {
+  const done = state.completedSteps.size, total = STEPS.length;
+  document.getElementById('progressLabel').textContent = `${done} / ${total}`;
+  document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+}
+
+/* ══════════ CENTER PANEL ══════════ */
+function renderStep(stepId) {
+  const step = STEPS.find(s => s.id === stepId);
+  if (!step) return;
+  const panel = document.getElementById('centerPanel');
+  panel.innerHTML = '';
+  const header = mk('div','step-header');
+  header.innerHTML = `<div class="step-icon">${step.icon}</div><div><div class="step-title">Шаг ${step.id}: ${step.label}</div><div class="step-desc">${step.desc}</div></div>`;
+  panel.appendChild(header);
+  const script = mk('div','script-block');
+  script.innerHTML = `<div class="script-title">💬 Скрипт</div><p>«${step.script}»</p>`;
+  panel.appendChild(script);
+  const tipsWrap = mk('div','');
+  tipsWrap.innerHTML = `<div class="section-label">Подсказки</div>`;
+  const grid = mk('div','tips-grid');
+  step.tips.forEach(tip => {
+    const card = mk('div','tip-card');
+    card.innerHTML = `<div class="tip-icon">${tip.icon}</div><div class="tip-title">${tip.title}</div><div class="tip-text">${tip.text}</div>${tip.badge?`<div class="tip-badge">${tip.badge}</div>`:''}`;
+    grid.appendChild(card);
+  });
+  tipsWrap.appendChild(grid);
+  panel.appendChild(tipsWrap);
+  if (step.hasRadio) panel.appendChild(renderRadioSection(step));
+  if (step.hasConsultForm) panel.appendChild(renderConsultForm());
+  if (step.hasComplaintForm) panel.appendChild(renderComplaintForm());
+  if (step.hasAppointmentForm) panel.appendChild(renderAppointmentForm());
+  if (step.hasSummary) panel.appendChild(renderSummary());
+  if (stepId < 6) {
+    const bar = mk('div','action-bar');
+    const btnNext = document.createElement('button');
+    btnNext.className = 'btn-next'; btnNext.textContent = `Отметить и перейти к шагу ${stepId+1} →`;
+    btnNext.onclick = () => completeAndNext(stepId);
+    const btnSkip = document.createElement('button');
+    btnSkip.className = 'btn-skip'; btnSkip.textContent = 'Пропустить шаг';
+    btnSkip.onclick = () => goToStep(stepId+1);
+    bar.appendChild(btnNext); bar.appendChild(btnSkip);
+    panel.appendChild(bar);
+  }
+}
+
+function completeAndNext(stepId) {
+  state.completedSteps.add(stepId);
+  if (stepId < 6) {
+    state.currentStep = stepId+1; renderChecklist(); renderStep(stepId+1);
+    showNotif(`Шаг ${stepId} выполнен ✓`, STEPS.find(s=>s.id===stepId+1)?.label||'', 'ok');
+  } else renderChecklist();
+}
+function goToStep(stepId) { if (stepId>6) stepId=6; state.currentStep=stepId; renderChecklist(); renderStep(stepId); }
+
+function renderRadioSection(step) {
+  const wrap = mk('div','');
+  wrap.innerHTML = `<div class="section-label">${step.radioLabel}</div>`;
+  const rg = mk('div','radio-group');
+  step.radioOptions.forEach(opt => {
+    const div = mk('div','radio-option');
+    if (state.callType===opt.id) div.classList.add('selected');
+    div.innerHTML = `<div class="radio-dot"></div>${opt.emoji} ${opt.label}`;
+    div.onclick = () => { document.querySelectorAll('.radio-option').forEach(d=>d.classList.remove('selected')); div.classList.add('selected'); state.callType=opt.id; };
+    rg.appendChild(div);
+  });
+  wrap.appendChild(rg); return wrap;
+}
+
+function renderConsultForm() {
+  const wrap = mk('div','');
+  wrap.innerHTML = `<div class="section-label">Заметки консультации</div><div class="form-row"><div class="form-group"><label>Что интересует клиента</label><input type="text" id="cInterest" placeholder="напр. прогрессивные линзы" /></div><div class="form-group"><label>Рецепт / параметры</label><input type="text" id="cPrescription" placeholder="Sph: -2.5, Cyl: -0.5" /></div></div><div class="form-row" style="margin-top:8px"><div class="form-group"><label>Предложенные товары</label><input type="text" id="cProducts" placeholder="Наименование / артикул" /></div><div class="form-group"><label>Статус</label><select id="cStatus"><option>Подбираем вариант</option><option>Товар в наличии</option><option>Нужно перемещение</option><option>Оформлен заказ</option></select></div></div>`;
+  setTimeout(() => {
+    ['cInterest','cPrescription','cProducts','cStatus'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.oninput = () => { state.consultData[id] = el.value; };
+    });
+    if (state.consultData.cInterest) { const el=document.getElementById('cInterest'); if(el) el.value=state.consultData.cInterest; }
+  }, 10);
+  return wrap;
+}
+
+function renderComplaintForm() {
+  const wrap = mk('div','');
+  wrap.innerHTML = `<div class="section-label">Фиксация жалобы</div>`;
+  const types = mk('div','complaint-types');
+  [{id:'quality',icon:'🔧',label:'Качество товара'},{id:'service',icon:'👤',label:'Качество сервиса'},{id:'delivery',icon:'🚚',label:'Сроки / доставка'},{id:'other',icon:'❓',label:'Другое'}].forEach(ct => {
+    const div = mk('div','complaint-type');
+    if (state.complaintData.type===ct.id) div.classList.add('selected');
+    div.innerHTML = `<div class="ct-icon">${ct.icon}</div>${ct.label}`;
+    div.onclick = () => { document.querySelectorAll('.complaint-type').forEach(d=>d.classList.remove('selected')); div.classList.add('selected'); state.complaintData.type=ct.id; };
+    types.appendChild(div);
+  });
+  wrap.appendChild(types);
+  const formRow = mk('div','form-row'); formRow.style.marginTop = '12px';
+  formRow.innerHTML = `<div class="form-group" style="grid-column:1/-1"><label>Суть жалобы (дословно)</label><textarea rows="3" id="cComplaintDesc" placeholder="Опишите проблему клиента..."></textarea></div><div class="form-group"><label>Предложенное решение</label><select id="cComplaintSolution"><option>Передать руководителю</option><option>Замена товара</option><option>Возврат средств</option><option>Скидка на следующую покупку</option><option>Другое</option></select></div><div class="form-group"><label>Срок ответа клиенту</label><input type="text" id="cComplaintDeadline" value="3 рабочих дня" /></div>`;
+  wrap.appendChild(formRow);
+  setTimeout(() => {
+    const desc=document.getElementById('cComplaintDesc'), sol=document.getElementById('cComplaintSolution');
+    if (desc) desc.oninput=()=>{state.complaintData.desc=desc.value;};
+    if (sol) sol.oninput=()=>{state.complaintData.solution=sol.value;};
+  }, 10);
+  return wrap;
+}
+
+function renderAppointmentForm() {
+  const wrap = mk('div','');
+  wrap.innerHTML = `<div class="section-label">Запись на проверку зрения</div><div class="form-row"><div class="form-group"><label>Имя клиента</label><input type="text" id="apptName" placeholder="Иван Иванов" /></div><div class="form-group"><label>Телефон</label><input type="text" id="apptPhone" placeholder="+7 (999) 000-00-00" /></div><div class="form-group"><label>Дата приёма</label><input type="date" id="apptDate" /></div><div class="form-group"><label>Время</label><select id="apptTime"><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>14:00</option><option>15:00</option><option>16:00</option><option>17:00</option><option>18:00</option><option>19:00</option></select></div><div class="form-group"><label>Салон</label><select id="apptSalon"><option>Ленина, 12</option><option>Мира, 45</option><option>ТЦ Галактика, 2 эт.</option></select></div><div class="form-group"><label>Тип визита</label><select id="apptType"><option>Первичный</option><option>Повторный</option></select></div></div><div style="margin-top:10px"><button class="btn btn-primary" onclick="saveAppointment()">📅 Сохранить запись</button></div>`;
+  setTimeout(() => { const inp=document.getElementById('apptDate'); if(inp) inp.value=new Date().toISOString().split('T')[0]; }, 10);
+  return wrap;
+}
+
+function saveAppointment() {
+  const name=document.getElementById('apptName')?.value||'—', phone=document.getElementById('apptPhone')?.value||'—';
+  const date=document.getElementById('apptDate')?.value||'—', time=document.getElementById('apptTime')?.value||'—';
+  const salon=document.getElementById('apptSalon')?.value||'—';
+  state.appointmentData = {name, phone, date, time, salon};
+  showNotif('Запись сохранена ✓', `${name} — ${salon}, ${date} в ${time}`, 'ok');
+}
+
+function renderSummary() {
+  const duration = document.getElementById('timer').textContent;
+  const client = document.getElementById('clientName')?.value||'—';
+  const doneCount = state.completedSteps.size;
+  const callTypeLabel = {glasses:'Очки / оправы',lenses:'Контактные линзы',sun:'Солнцезащитные',accessories:'Аксессуары',complaint:'Жалоба',appointment:'Запись на приём'}[state.callType]||'—';
+  const quality = doneCount>=5?{label:'Отлично',cls:'tag-green'}:doneCount>=3?{label:'Хорошо',cls:'tag-amber'}:{label:'Неполный',cls:'tag-red'};
+  const wrap = mk('div','');
+  wrap.innerHTML = `<div class="section-label">Итоги звонка</div>
+    <div class="finish-summary">
+      <div class="summary-item"><span class="si-label">Клиент</span><span class="si-val">${client}</span></div>
+      <div class="summary-item"><span class="si-label">Менеджер</span><span class="si-val">${app.session?.username||'—'}</span></div>
+      <div class="summary-item"><span class="si-label">Длительность</span><span class="si-val">${duration}</span></div>
+      <div class="summary-item"><span class="si-label">Тема обращения</span><span class="si-val">${callTypeLabel}</span></div>
+      <div class="summary-item"><span class="si-label">Выполнено шагов</span><span class="si-val">${doneCount} из ${STEPS.length}</span></div>
+      <div class="summary-item"><span class="si-label">Качество звонка</span><span class="tag ${quality.cls}">${quality.label}</span></div>
+    </div>
+    <div class="sheets-bar" style="margin-top:14px">
+      <div class="sheets-icon">📊</div>
+      <div class="sheets-label"><strong>Сохранить в Google Таблицу</strong>Данные звонка будут добавлены в общую таблицу</div>
+      <button class="btn btn-primary" id="sendSheetsBtn" onclick="sendToSheets()">Отправить</button>
+    </div>
+    <div style="margin-top:12px;display:flex;gap:10px">
+      <button class="btn btn-success" onclick="resetCall()" style="font-size:14px;padding:10px 22px">+ Новый звонок</button>
+    </div>`;
+  return wrap;
+}
+
+/* ══════════ SAVE CALL ══════════ */
+async function sendToSheets() {
+  if (!app.session) { showNotif('Не авторизован', 'Войдите в систему', 'err'); return; }
+  const btn = document.getElementById('sendSheetsBtn');
+  if (btn) { btn.textContent = '⏳ Отправляем...'; btn.disabled = true; }
+  const client = document.getElementById('clientName')?.value||'';
+  const phone = document.getElementById('clientPhone')?.value||'';
+  const duration = document.getElementById('timer')?.textContent||'';
+  const doneCount = state.completedSteps.size;
+  const callTypeLabel = {glasses:'Очки / оправы',lenses:'Контактные линзы',sun:'Солнцезащитные',accessories:'Аксессуары',complaint:'Жалоба',appointment:'Запись на приём'}[state.callType]||'';
+  const quality = doneCount>=5?'Отлично':doneCount>=3?'Хорошо':'Неполный';
+  try {
+    await api({
+      action:'saveCall', token:app.session.token,
+      timestamp:new Date().toLocaleString('ru-RU'),
+      clientName:client, clientPhone:phone, callType:callTypeLabel,
+      duration, stepsCompleted:String(doneCount), quality,
+      appointmentDate:state.appointmentData.date||'',
+      appointmentTime:state.appointmentData.time||'',
+      appointmentSalon:state.appointmentData.salon||'',
+      complaintType:state.complaintData.type||'',
+      notes:state.consultData.cInterest||'',
+    });
+    showNotif('✅ Сохранено', client?`Звонок с ${client} сохранён`:'Данные сохранены', 'ok');
+    if (btn) btn.textContent = '✅ Отправлено';
+    loadCallSummary();
+  } catch(e) {
+    showNotif('❌ Ошибка отправки', e.message, 'err');
+    if (btn) { btn.textContent = 'Повторить'; btn.disabled = false; }
+  }
+}
+
+/* ══════════ RESET ══════════ */
+function resetCall() {
+  clearInterval(state.timerInterval);
+  state = {callActive:false,timerSeconds:0,timerInterval:null,currentStep:1,completedSteps:new Set(),callType:null,appointmentData:{},complaintData:{},consultData:{}};
+  const timer = document.getElementById('timer');
+  if (timer) timer.textContent = '00:00';
+  const cn = document.getElementById('clientName'); if(cn) cn.value='';
+  const cp = document.getElementById('clientPhone'); if(cp) cp.value='';
+  const badge = document.getElementById('callBadge'); if(badge) badge.classList.remove('active');
+  const cs = document.getElementById('callStatus'); if(cs) cs.textContent='Ожидание звонка';
+  const s1 = document.getElementById('startCallBtn'); if(s1) s1.classList.remove('hidden');
+  const e1 = document.getElementById('endCallBtn'); if(e1) e1.classList.add('hidden');
+  const panel = document.getElementById('centerPanel');
+  if (panel) panel.innerHTML = `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px"><svg width="72" height="72" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#2BA4E8"/><line x1="9" y1="20" x2="6" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/><ellipse cx="14" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/><line x1="19.5" y1="21" x2="20.5" y2="21" stroke="white" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="26" cy="21" rx="5.5" ry="4" fill="none" stroke="white" stroke-width="2.4"/><line x1="31" y1="20" x2="34" y2="15" stroke="white" stroke-width="2" stroke-linecap="round"/></svg><div style="font-size:22px;font-weight:700;color:var(--text)">Готов к работе</div><div style="font-size:14px;text-align:center;max-width:360px;line-height:1.7;color:var(--text-muted)">Введите имя клиента и нажмите <strong style="color:var(--primary)">«Начать звонок»</strong>.<br>Чек-лист проведёт по всем шагам, правая панель — ваш справочник.</div></div>`;
+  renderChecklist();
+}
+
+/* ══════════ RIGHT PANEL ══════════ */
+function switchRefTab(tabEl, tab) {
+  document.querySelectorAll('.ref-tab').forEach(t => t.classList.remove('active'));
+  tabEl.classList.add('active');
+  renderRefPanel(tab);
+}
+function renderRefPanel(tab) {
+  const body = document.getElementById('refBody');
+  if (!body) return;
+  body.innerHTML = '';
+  if (tab === 'products') {
+    const search = document.createElement('input');
+    search.type='text'; search.className='ref-search'; search.placeholder='🔍 Поиск по товарам...';
+    body.appendChild(search);
+    PRODUCTS.forEach(p => body.appendChild(makeProductCard(p)));
+    search.oninput = () => { const q=search.value.toLowerCase(); body.querySelectorAll('.product-card').forEach(c => { c.style.display=c.dataset.name.includes(q)?'':'none'; }); };
+  }
+  if (tab === 'faq') {
+    const search = document.createElement('input');
+    search.type='text'; search.className='ref-search'; search.placeholder='🔍 Поиск по FAQ...';
+    body.appendChild(search);
+    FAQS.forEach(f => body.appendChild(makeFaqItem(f)));
+    search.oninput = () => { const q=search.value.toLowerCase(); body.querySelectorAll('.faq-item').forEach(i => { i.style.display=i.textContent.toLowerCase().includes(q)?'':'none'; }); };
+  }
+  if (tab === 'procedures') {
+    PROCEDURES.forEach(p => { const div=mk('div','proc-item'); div.innerHTML=`<div class="proc-title">📋 ${p.title}</div><ol>${p.steps.map(s=>`<li>${s}</li>`).join('')}</ol>`; body.appendChild(div); });
+  }
+}
+function makeProductCard(p) {
+  const div = mk('div','product-card'); div.dataset.name = p.name.toLowerCase();
+  const cls = {in:'in-stock',low:'low-stock',out:'out-stock'}[p.stock];
+  div.innerHTML = `<div class="pc-name">${p.name}</div><div class="pc-price">${p.price}</div><div class="pc-details">${p.details.replace(/\n/g,'<br>')}</div><div class="stock-badge ${cls}">${p.stockLabel}</div>`;
+  return div;
+}
+function makeFaqItem(f) {
+  const div = mk('div','faq-item');
+  div.innerHTML = `<div class="faq-q" onclick="this.parentElement.classList.toggle('open')">${f.q}<span class="arrow">▶</span></div><div class="faq-a">${f.a}</div>`;
+  return div;
+}
+
+/* ══════════ ALL CALLS SECTION ══════════ */
+let allCalls = [];
+let callsInitialized = false;
+
+function initCallsSection() {
+  callsInitialized = true;
+  const sec = document.getElementById('bossCallsSection');
+  sec.innerHTML = `
+    <div class="calls-filter-bar">
+      <select class="filter-sel" id="filterManager" onchange="applyCallsFilter()">
+        <option value="">👤 Все менеджеры</option>
+      </select>
+      <span class="filter-date-sep">с</span>
+      <input type="date" class="filter-inp" id="filterDateFrom" onchange="applyCallsFilter()" />
+      <span class="filter-date-sep">по</span>
+      <input type="date" class="filter-inp" id="filterDateTo" onchange="applyCallsFilter()" />
+      <select class="filter-sel" id="filterTopic" onchange="applyCallsFilter()">
+        <option value="">📋 Все темы</option>
+        <option>Очки / оправы</option>
+        <option>Контактные линзы</option>
+        <option>Солнцезащитные</option>
+        <option>Аксессуары</option>
+        <option>Жалоба</option>
+        <option>Запись на приём</option>
+      </select>
+      <select class="filter-sel" id="filterQuality" onchange="applyCallsFilter()">
+        <option value="">⭐ Все оценки</option>
+        <option>Отлично</option>
+        <option>Хорошо</option>
+        <option>Неполный</option>
+      </select>
+      <input type="text" class="filter-inp" id="filterSearch" style="flex:1;min-width:160px"
+        placeholder="🔍 Клиент, телефон, заметки..." oninput="applyCallsFilter()" />
+      <button class="boss-refresh" onclick="resetCallsFilters()">✕ Сбросить</button>
+      <button class="boss-refresh" style="border-color:var(--primary);color:var(--primary)" onclick="reloadCalls()">🔄 Обновить</button>
+    </div>
+    <div class="calls-table-outer" id="callsTableOuter">
+      <div class="calls-loading">⏳ Загружаем звонки...</div>
+    </div>
+    <div class="calls-count-bar" id="callsCountBar"></div>`;
+  reloadCalls();
+}
+
+async function reloadCalls() {
+  const outer = document.getElementById('callsTableOuter');
+  if (outer) outer.innerHTML = '<div class="calls-loading">⏳ Загружаем звонки...</div>';
+  try {
+    const data = await api({action:'getCalls', token:app.session.token});
+    allCalls = data.calls || [];
+    const managers = [...new Set(allCalls.map(c=>c.manager).filter(Boolean))].sort();
+    const sel = document.getElementById('filterManager');
+    if (sel) {
+      const cur = sel.value;
+      sel.innerHTML = '<option value="">👤 Все менеджеры</option>';
+      managers.forEach(m => { const o=document.createElement('option'); o.value=o.textContent=m; sel.appendChild(o); });
+      if (cur) sel.value = cur;
+    }
+    applyCallsFilter();
+  } catch(e) {
+    if (outer) outer.innerHTML = `<div class="calls-empty" style="color:var(--danger)">❌ ${e.message}</div>`;
+  }
+}
+
+function applyCallsFilter() {
+  const manager  = (document.getElementById('filterManager')?.value  || '');
+  const dateFrom = (document.getElementById('filterDateFrom')?.value || '');
+  const dateTo   = (document.getElementById('filterDateTo')?.value   || '');
+  const topic    = (document.getElementById('filterTopic')?.value    || '');
+  const quality  = (document.getElementById('filterQuality')?.value  || '');
+  const search   = (document.getElementById('filterSearch')?.value   || '').toLowerCase();
+
+  const filtered = allCalls.filter(c => {
+    if (manager && c.manager !== manager) return false;
+    if (topic   && c.callType !== topic)  return false;
+    if (quality && c.quality  !== quality) return false;
+    if (search  && !`${c.clientName||''} ${c.clientPhone||''} ${c.notes||''}`.toLowerCase().includes(search)) return false;
+    if (dateFrom || dateTo) {
+      const parts = String(c.timestamp).split(',')[0].trim().split('.');
+      if (parts.length === 3) {
+        const d = `${parts[2]}-${parts[1]}-${parts[0]}`;
+        if (dateFrom && d < dateFrom) return false;
+        if (dateTo   && d > dateTo)   return false;
+      }
+    }
+    return true;
+  });
+  renderCallsTable(filtered, allCalls.length);
+}
+
+function resetCallsFilters() {
+  ['filterManager','filterTopic','filterQuality'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['filterDateFrom','filterDateTo','filterSearch'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  applyCallsFilter();
+}
+
+function renderCallsTable(calls, total) {
+  const outer  = document.getElementById('callsTableOuter');
+  const cntBar = document.getElementById('callsCountBar');
+  if (!outer) return;
+
+  if (!calls.length) {
+    outer.innerHTML = '<div class="calls-empty">Нет звонков по выбранным фильтрам</div>';
+    if (cntBar) cntBar.innerHTML = `<span>Показано <strong>0</strong> из ${total} записей</span>`;
+    return;
+  }
+
+  const qCls = q => q==='Отлично'?'sbadge-g':q==='Хорошо'?'sbadge-a':q==='Неполный'?'sbadge-r':'sbadge-gr';
+
+  const rows = calls.map(c => `<tr>
+    <td class="td-ts">${c.timestamp||''}</td>
+    <td><strong>${c.manager||''}</strong></td>
+    <td>${c.clientName||''}</td>
+    <td class="td-phone">${c.clientPhone||''}</td>
+    <td>${c.callType||''}</td>
+    <td class="td-c">${c.duration||''}</td>
+    <td class="td-c">${c.stepsCompleted||''}</td>
+    <td class="td-c">${c.quality?`<span class="sbadge ${qCls(c.quality)}">${c.quality}</span>`:''}</td>
+    <td class="td-c">${c.appointmentDate||''}</td>
+    <td class="td-c">${c.appointmentTime||''}</td>
+    <td>${c.appointmentSalon||''}</td>
+    <td>${c.complaintType||''}</td>
+    <td class="td-notes">${c.notes||''}</td>
+  </tr>`).join('');
+
+  outer.innerHTML = `<table class="calls-table">
+    <thead><tr>
+      <th>Дата/Время</th><th>Менеджер</th><th>Клиент</th><th>Телефон</th>
+      <th>Тема</th><th>Длит.</th><th>Шагов</th><th>Качество</th>
+      <th>Дата записи</th><th>Время</th><th>Салон</th><th>Жалоба</th><th>Заметки</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  if (cntBar) cntBar.innerHTML = `<span>Показано <strong>${calls.length}</strong> из ${total} записей</span>${calls.length<total?`<span style="color:var(--primary);margin-left:8px">· фильтр активен</span>`:''}`;
+}
+
+/* ══════════ SETUP MODAL ══════════ */
+function openSetup() {
+  document.getElementById('sheetsUrlInput').value = app.scriptUrl;
+  document.getElementById('sheetIdInput').value = app.sheetId;
+  document.getElementById('urlSavedBadge').classList.toggle('hidden', !app.scriptUrl);
+  document.getElementById('scriptCode').textContent = generateScriptCode(app.sheetId);
+  document.getElementById('setupModal').classList.add('open');
+}
+function closeSetup() { document.getElementById('setupModal').classList.remove('open'); }
+function updateScriptCode() {
+  const id = document.getElementById('sheetIdInput').value.trim() || app.sheetId;
+  document.getElementById('scriptCode').textContent = generateScriptCode(id);
+}
+function saveScriptUrl() {
+  const url = document.getElementById('sheetsUrlInput').value.trim();
+  const sid = document.getElementById('sheetIdInput').value.trim();
+  if (!url) { showNotif('⚠️', 'Введите URL скрипта', 'err'); return; }
+  localStorage.setItem(STORAGE_KEY, url); app.scriptUrl = url;
+  if (sid) {
+    localStorage.setItem(SHEET_ID_KEY, sid); app.sheetId = sid;
+    const lnk = document.getElementById('bossSheetLink');
+    if (lnk) lnk.href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
+  }
+  document.getElementById('urlSavedBadge').classList.remove('hidden');
+  showNotif('✅ Настройки сохранены', 'Интеграция активна', 'ok');
+}
+function copyScript() {
+  const code = document.getElementById('scriptCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = 'Скопировано!';
+    setTimeout(() => btn.textContent = 'Копировать', 2000);
+  });
+}
+document.getElementById('setupModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeSetup(); });
+
+/* ══════════ SCRIPT CODE GENERATOR ══════════ */
+function generateScriptCode(sheetId) {
+  return `// ═══════ ПИТЕР ОПТИКА — Apps Script v2 ═══════
+const SHEET_ID = '${sheetId}';
+
+function doGet(e) {
+  const p = e.parameter;
+  try {
+    switch (p.action) {
+      case 'login':       return r(login(p));
+      case 'setPassword': return r(setPassword(p));
+      case 'addUser':     return r(addUser(p));
+      case 'getUsers':    return r(getUsers(p));
+      case 'getStats':    return r(getStats(p));
+      case 'saveCall':    return r(saveCall(p));
+      case 'getSummary':  return r(getSummary(p));
+      case 'getCalls':    return r(getCalls(p));
+      default:            return r({error:'Unknown action'});
+    }
+  } catch(err) { return r({error: err.message}); }
+}
+
+function r(d) {
+  return ContentService.createTextOutput(JSON.stringify(d))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function ss() { return SpreadsheetApp.openById(SHEET_ID); }
+
+function mkSheet(name, headers, bg) {
+  const wb = ss(), ex = wb.getSheetByName(name);
+  if (ex) return ex;
+  const s = wb.insertSheet(name);
+  s.appendRow(headers);
+  s.getRange(1,1,1,headers.length).setFontWeight('bold')
+    .setBackground(bg||'#2BA4E8').setFontColor('#fff');
+  s.setFrozenRows(1);
+  return s;
+}
+
+function uSheet() {
+  const s = mkSheet('Пользователи',['Имя','Хеш','Роль','Создан']);
+  if (s.getLastRow() < 2)
+    s.appendRow(['Начальник','','boss',new Date().toLocaleString('ru-RU')]);
+  return s;
+}
+function sSheet() {
+  return mkSheet('Сессии',['Токен','Имя','Роль','Истекает'],'#5B7FA6');
+}
+function cSheet() {
+  return mkSheet('Звонки',['Дата/Время','Менеджер','Клиент','Телефон',
+    'Тема','Длительность','Шагов','Качество',
+    'Дата записи','Время','Салон','Жалоба','Заметки']);
+}
+
+function findUser(name) {
+  const d = uSheet().getDataRange().getValues();
+  for (let i=1;i<d.length;i++)
+    if (d[i][0]===name) return {row:i+1,name:d[i][0],hash:d[i][1],role:d[i][2]};
+  return null;
+}
+
+function newSession(name, role) {
+  const t = Utilities.getUuid();
+  sSheet().appendRow([t, name, role,
+    new Date(Date.now()+28800000).toISOString()]);
+  return t;
+}
+
+function checkToken(token) {
+  if (!token) return null;
+  const d = sSheet().getDataRange().getValues(), now = new Date();
+  for (let i=1;i<d.length;i++)
+    if (d[i][0]===token && new Date(d[i][3])>now)
+      return {name:d[i][1], role:d[i][2]};
+  return null;
+}
+
+function guard(token, role) {
+  const s = checkToken(token);
+  if (!s) throw new Error('Не авторизован');
+  if (role && s.role!==role) throw new Error('Недостаточно прав');
+  return s;
+}
+
+function login(p) {
+  const u = findUser(p.username);
+  if (!u) return {error:'Пользователь не найден'};
+  if (u.hash==='') return {status:'first_login',role:u.role,username:u.name};
+  if (u.hash!==p.passwordHash) return {error:'Неверный пароль'};
+  return {status:'ok',token:newSession(u.name,u.role),role:u.role,username:u.name};
+}
+
+function setPassword(p) {
+  const u = findUser(p.username);
+  if (!u || u.hash!=='') throw new Error('Ошибка установки пароля');
+  uSheet().getRange(u.row,2).setValue(p.passwordHash);
+  return {status:'ok',token:newSession(u.name,u.role),role:u.role,username:u.name};
+}
+
+function addUser(p) {
+  guard(p.token,'boss');
+  const name = (p.newUsername||'').trim();
+  if (!name) throw new Error('Имя не указано');
+  if (findUser(name)) return {error:'Пользователь уже существует'};
+  uSheet().appendRow([name,'',p.newRole||'manager',
+    new Date().toLocaleString('ru-RU')]);
+  return {status:'ok'};
+}
+
+function getUsers(p) {
+  guard(p.token,'boss');
+  const d = uSheet().getDataRange().getValues(), users = [];
+  for (let i=1;i<d.length;i++)
+    users.push({name:d[i][0],role:d[i][2],created:d[i][3],hasPass:d[i][1]!==''});
+  return {status:'ok', users};
+}
+
+function getStats(p) {
+  guard(p.token,'boss');
+  const sheet = cSheet();
+  if (sheet.getLastRow()<=1)
+    return {status:'ok',todayCalls:0,avgQuality:0,topManager:null,managers:[],last7:[]};
+  const data = sheet.getDataRange().getValues();
+  const today = new Date().toLocaleDateString('ru-RU');
+  const now = new Date();
+  const qM = {'Отлично':3,'Хорошо':2,'Неполный':1};
+  const mgr = {}, days = {};
+  for (let d=6;d>=0;d--)
+    days[new Date(now-d*86400000).toLocaleDateString('ru-RU')] = 0;
+  for (let i=1;i<data.length;i++) {
+    const ts=String(data[i][0]), name=data[i][1], q=data[i][7];
+    if (!name) continue;
+    if (!mgr[name]) mgr[name]={total:0,today:0,qSum:0,qN:0};
+    mgr[name].total++;
+    const dk = ts.split(',')[0].trim();
+    if (dk in days) days[dk]++;
+    if (ts.startsWith(today)) mgr[name].today++;
+    const qv = qM[q]||0;
+    if (qv) { mgr[name].qSum+=qv; mgr[name].qN++; }
+  }
+  const managers = Object.entries(mgr)
+    .map(([n,s])=>({name:n,total:s.total,today:s.today,
+      avg:s.qN?(s.qSum/s.qN).toFixed(2):'0'}))
+    .sort((a,b)=>b.total-a.total);
+  const qArr = managers.filter(m=>parseFloat(m.avg)>0);
+  const avgQ = qArr.length
+    ? (qArr.reduce((s,m)=>s+parseFloat(m.avg),0)/qArr.length).toFixed(2) : 0;
+  return {
+    status:'ok',
+    todayCalls: managers.reduce((s,m)=>s+m.today,0),
+    avgQuality: parseFloat(avgQ),
+    topManager: managers[0]||null, managers,
+    last7: Object.entries(days).map(([d,c])=>({date:d,count:c}))
+  };
+}
+
+function saveCall(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  cSheet().appendRow([
+    p.timestamp, s.name, p.clientName, p.clientPhone, p.callType,
+    p.duration, p.stepsCompleted, p.quality,
+    p.appointmentDate, p.appointmentTime, p.appointmentSalon,
+    p.complaintType, p.notes
+  ]);
+  return {status:'ok'};
+}
+
+function getSummary(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const sheet = cSheet();
+  if (sheet.getLastRow()<=1) return {status:'ok',summary:[]};
+  const data = sheet.getDataRange().getValues();
+  const today = new Date().toLocaleDateString('ru-RU');
+  const mgr = {};
+  for (let i=1;i<data.length;i++) {
+    const name=data[i][1], ts=String(data[i][0]);
+    if (!name) continue;
+    if (!mgr[name]) mgr[name]={total:0,today:0};
+    mgr[name].total++;
+    if (ts.startsWith(today)) mgr[name].today++;
+  }
+  return {status:'ok',
+    summary:Object.entries(mgr)
+      .map(([n,s])=>({name:n,...s}))
+      .sort((a,b)=>b.total-a.total)};
+}
+
+function getCalls(p) {
+  guard(p.token,'boss');
+  const sheet = cSheet();
+  if (sheet.getLastRow()<=1) return {status:'ok',calls:[]};
+  const data = sheet.getDataRange().getValues();
+  const calls = [];
+  for (let i=data.length-1;i>=1;i--) {
+    const row = data[i];
+    calls.push({
+      timestamp:String(row[0]), manager:row[1], clientName:row[2],
+      clientPhone:row[3], callType:row[4], duration:row[5],
+      stepsCompleted:row[6], quality:row[7], appointmentDate:row[8],
+      appointmentTime:row[9], appointmentSalon:row[10],
+      complaintType:row[11], notes:row[12]
+    });
+  }
+  return {status:'ok', calls};
+}`;
+}
+
+/* ══════════ NOTIFICATION ══════════ */
+function showNotif(title, msg, type='') {
+  const n = document.getElementById('notif');
+  n.className = `notif${type?' notif-'+type:''}`;
+  document.getElementById('notifTitle').textContent = title;
+  document.getElementById('notifMsg').textContent = msg;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), 3800);
+}
+
+/* ══════════ HELPERS ══════════ */
+function mk(tag, cls) { const d=document.createElement(tag); if(cls) d.className=cls; return d; }
+
+/* ══════════ INIT ══════════ */
+(function init() {
+  const saved = sessionStorage.getItem('po_session');
+  if (saved) {
+    try {
+      const session = JSON.parse(saved);
+      if (session.expires && session.expires > Date.now()) {
+        app.session = session;
+        enterApp();
+        return;
+      }
+    } catch(e) {}
+    sessionStorage.removeItem('po_session');
+  }
+  showScreen('screenLogin');
+  document.getElementById('scriptCode').textContent = generateScriptCode(app.sheetId);
+})();
+</script>
+</body>
+</html>
