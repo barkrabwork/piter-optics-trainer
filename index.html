@@ -275,6 +275,29 @@
   .calls-count-bar{padding:9px 20px;font-size:12px;color:var(--text-muted);background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:8px;}
   .calls-empty{padding:60px;text-align:center;color:var(--text-muted);font-size:14px;}
   .calls-loading{padding:60px;text-align:center;color:var(--text-muted);}
+
+  /* ── PRODUCTS TABLE (BOSS) ── */
+  .products-table{width:100%;border-collapse:collapse;min-width:1800px;}
+  .products-table thead th{background:var(--surface);color:var(--text-muted);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;padding:10px 10px;text-align:left;border-bottom:2px solid var(--border);position:sticky;top:0;z-index:2;white-space:nowrap;box-shadow:0 1px 0 var(--border);cursor:pointer;user-select:none;transition:color .15s;}
+  .products-table thead th:hover{color:var(--primary);}
+  .products-table thead th.sort-asc::after{content:' ▲';color:var(--primary);font-size:9px;}
+  .products-table thead th.sort-desc::after{content:' ▼';color:var(--primary);font-size:9px;}
+  .products-table tbody tr:nth-child(odd) td{background:#fff;}
+  .products-table tbody tr:nth-child(even) td{background:var(--surface2);}
+  .products-table tbody tr:hover td{background:var(--primary-light);}
+  .products-table td{padding:8px 10px;font-size:12px;color:var(--text);border-bottom:1px solid #edf4fb;white-space:nowrap;vertical-align:middle;}
+  .td-pname{font-weight:600;white-space:normal;min-width:160px;max-width:200px;}
+  .pt-bottom{display:flex;align-items:center;justify-content:space-between;padding:10px 20px;background:var(--surface);border-top:1px solid var(--border);flex-shrink:0;font-size:12px;color:var(--text-muted);}
+  .pt-page-btn{padding:5px 14px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text-muted);cursor:pointer;font-size:12px;font-weight:600;transition:all .15s;}
+  .pt-page-btn:hover:not([disabled]){border-color:var(--primary);color:var(--primary);}
+  .pt-page-btn[disabled]{opacity:.4;cursor:not-allowed;}
+
+  /* ── REF PANEL FILTERS (MANAGER) ── */
+  .ref-filters{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
+  .ref-filter-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .ref-filter-sel{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;transition:border-color .2s;}
+  .ref-filter-sel:focus{border-color:var(--primary);}
+  .ref-count-bar{font-size:11px;color:var(--text-muted);text-align:center;padding:2px 0;flex-shrink:0;}
 </style>
 </head>
 <body>
@@ -305,7 +328,7 @@
         onkeydown="if(event.key==='Enter')handleLogin()" />
       <button class="auth-btn" id="loginBtn" onclick="handleLogin()">Войти</button>
       <div class="auth-hint">При первом входе введите логин <strong>Начальник</strong> и оставьте пароль пустым</div>
-      <div class="auth-link" onclick="openSetup()">⚙ Настройка скрипта Google Apps</div>
+      <div class="auth-link" id="setupLink" onclick="openSetup()">⚙ Настройка скрипта Google Apps</div>
     </div>
   </div>
 </div>
@@ -368,11 +391,13 @@
   <div class="boss-nav-bar">
     <button class="boss-nav-tab active" id="tabDashboard" onclick="switchBossTab('dashboard')">📊 Дашборд</button>
     <button class="boss-nav-tab" id="tabCalls" onclick="switchBossTab('calls')">📋 Все звонки</button>
+    <button class="boss-nav-tab" id="tabProducts" onclick="switchBossTab('products')">📦 Товары</button>
   </div>
   <div class="boss-wrap" id="bossDashSection">
     <div style="padding:40px;text-align:center;color:var(--text-muted)">⏳ Загружаем данные...</div>
   </div>
   <div class="boss-calls-wrap hidden" id="bossCallsSection"></div>
+  <div class="boss-calls-wrap hidden" id="bossProductsSection"></div>
 </div>
 
 <!-- ═══ SCREEN: MANAGER ═══ -->
@@ -554,6 +579,9 @@ let state = {
   callType:null, appointmentData:{}, complaintData:{}, consultData:{},
 };
 
+// Рабочий каталог товаров: стартует со статикой, заменяется данными из листа «Товары»
+let PRODUCTS_DATA = [...PRODUCTS];
+
 /* ══════════ SHA-256 ══════════ */
 async function sha256(str) {
   if (!str) return '';
@@ -634,6 +662,7 @@ function enterApp() {
     resetCall();
     renderRefPanel('products');
     loadCallSummary();
+    loadProductsFromSheet();
   }
 }
 
@@ -647,18 +676,23 @@ function logout() {
 
 /* ══════════ BOSS DASHBOARD ══════════ */
 function switchBossTab(tab) {
-  const isDash = tab === 'dashboard';
-  document.getElementById('bossDashSection').classList.toggle('hidden', !isDash);
-  document.getElementById('bossCallsSection').classList.toggle('hidden', isDash);
-  document.getElementById('tabDashboard').classList.toggle('active', isDash);
-  document.getElementById('tabCalls').classList.toggle('active', !isDash);
-  if (!isDash && !callsInitialized) initCallsSection();
+  const sections = {dashboard:'bossDashSection', calls:'bossCallsSection', products:'bossProductsSection'};
+  const tabs     = {dashboard:'tabDashboard',    calls:'tabCalls',        products:'tabProducts'};
+  Object.keys(sections).forEach(t => {
+    document.getElementById(sections[t]).classList.toggle('hidden', t !== tab);
+    document.getElementById(tabs[t]).classList.toggle('active', t === tab);
+  });
+  if (tab === 'calls'    && !callsInitialized)        initCallsSection();
+  if (tab === 'products' && !bossProductsInitialized) initBossProductsSection();
 }
 
 async function loadBossDashboard() {
   const content = document.getElementById('bossDashSection');
   content.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">⏳ Загружаем данные...</div>';
   try {
+    // Проверяем наличие листа «Товары» перед загрузкой дашборда
+    const checkRes = await api({action:'checkProductsSheet', token:app.session.token});
+    if (!checkRes.exists) { renderNoProductsSheet(); return; }
     const [statsRes, usersRes] = await Promise.all([
       api({action:'getStats', token:app.session.token}),
       api({action:'getUsers', token:app.session.token})
@@ -666,6 +700,33 @@ async function loadBossDashboard() {
     renderBossDashboard(statsRes, usersRes.users);
   } catch(e) {
     content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--danger)">❌ ${e.message}</div>`;
+  }
+}
+
+function renderNoProductsSheet() {
+  document.getElementById('bossDashSection').innerHTML = `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:20px;padding:40px">
+      <div style="font-size:48px">📋</div>
+      <div style="font-size:20px;font-weight:700;color:var(--text)">Лист «Товары» не найден</div>
+      <div style="font-size:14px;color:var(--text-muted);text-align:center;max-width:420px;line-height:1.7">
+        Для полноценной работы тренажёра нужен лист «Товары» в Google Таблице.
+        Нажмите кнопку ниже, чтобы создать его автоматически с примерами товаров.
+      </div>
+      <button class="btn btn-primary" id="createProductsSheetBtn" onclick="createProductsSheet()"
+        style="padding:12px 28px;font-size:15px">📋 Создать лист «Товары»</button>
+    </div>`;
+}
+
+async function createProductsSheet() {
+  const btn = document.getElementById('createProductsSheetBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Создаём...'; }
+  try {
+    await api({action:'ensureProductsSheet', token:app.session.token});
+    showNotif('✅ Лист создан', 'Лист «Товары» успешно добавлен в таблицу', 'ok');
+    loadBossDashboard();
+  } catch(e) {
+    showNotif('❌ Ошибка', e.message, 'err');
+    if (btn) { btn.disabled = false; btn.textContent = '📋 Создать лист «Товары»'; }
   }
 }
 
@@ -790,6 +851,59 @@ async function submitAddUser() {
   btn.disabled = false; btn.textContent = 'Добавить';
 }
 document.getElementById('addUserModal').addEventListener('click', e => { if (e.target===e.currentTarget) closeAddUserModal(); });
+
+/* ══════════ PRODUCTS FROM SHEETS ══════════ */
+async function loadProductsFromSheet() {
+  if (!app.session) return;
+  try {
+    const data = await api({action:'getProducts', token:app.session.token});
+    if (data.products && data.products.length > 0) {
+      PRODUCTS_DATA = data.products.map(normalizeProduct);
+    } else if (data.products) {
+      PRODUCTS_DATA = []; // лист есть, но пуст
+    }
+    // Перерисовываем вкладку «Товары», если она активна
+    const activeTab = document.querySelector('.ref-tab.active');
+    if (activeTab && activeTab.textContent.trim() === 'Товары') renderRefPanel('products');
+  } catch(e) {
+    console.warn('Не удалось загрузить товары:', e.message);
+    // Оставляем статический каталог без изменений
+  }
+}
+
+function normalizeProduct(p) {
+  const fields = [
+    p.gender    && `Пол: ${p.gender}`,
+    p.brand     && `Производитель: ${p.brand}`,
+    p.country   && `Страна: ${p.country}`,
+    p.material  && `Материал: ${p.material}`,
+    p.color     && `Цвет: ${p.color}`,
+    p.frameType && `Тип оправы: ${p.frameType}`,
+    p.model     && `Модель: ${p.model}`,
+    p.sku       && `Арт.: ${p.sku}`,
+    p.bc        && `BC: ${p.bc}`,
+    p.dia       && `DIA: ${p.dia}`,
+    p.sph       && `Sph: ${p.sph}`,
+    p.packQty   && `В пачке: ${p.packQty}`,
+    p.replacement && `Замена: ${p.replacement}`,
+    p.lensColor && `Цвет линз: ${p.lensColor}`,
+  ].filter(Boolean).join('\n');
+
+  const stockText = String(p.stock || '').toLowerCase();
+  const stockCode = !stockText || stockText.includes('нет') ? 'out'
+    : stockText.includes('огранич') || stockText.includes('мало') || stockText.includes('limit') ? 'low'
+    : 'in';
+  const stockLabel = p.stock || (stockCode==='in'?'Есть в наличии':stockCode==='low'?'Ограниченно':'Нет в наличии');
+
+  return {
+    name:p.name||'—', price:p.price||'', category:p.category||'', details:fields, stock:stockCode, stockLabel,
+    // сохраняем поля для фильтрации и таблицы начальника
+    brand:p.brand||'', gender:p.gender||'', color:p.color||'', lensColor:p.lensColor||'',
+    sku:p.sku||'', model:p.model||'', country:p.country||'', material:p.material||'',
+    frameType:p.frameType||'', bc:p.bc||'', dia:p.dia||'', sph:p.sph||'',
+    packQty:p.packQty||'', replacement:p.replacement||'', design:p.design||'',
+  };
+}
 
 /* ══════════ CALL SUMMARY (MANAGER) ══════════ */
 async function loadCallSummary() {
@@ -1077,11 +1191,55 @@ function renderRefPanel(tab) {
   if (!body) return;
   body.innerHTML = '';
   if (tab === 'products') {
-    const search = document.createElement('input');
-    search.type='text'; search.className='ref-search'; search.placeholder='🔍 Поиск по товарам...';
-    body.appendChild(search);
-    PRODUCTS.forEach(p => body.appendChild(makeProductCard(p)));
-    search.oninput = () => { const q=search.value.toLowerCase(); body.querySelectorAll('.product-card').forEach(c => { c.style.display=c.dataset.name.includes(q)?'':'none'; }); };
+    // Уникальные значения для фильтров
+    const cats   = [...new Set(PRODUCTS_DATA.map(p=>p.category||'').filter(Boolean))].sort();
+    const brands = [...new Set(PRODUCTS_DATA.map(p=>p.brand||'').filter(Boolean))].sort();
+    const colors = [...new Set([
+      ...PRODUCTS_DATA.map(p=>p.color||''),
+      ...PRODUCTS_DATA.map(p=>p.lensColor||'')
+    ].filter(Boolean))].sort();
+
+    function opts(arr) { return arr.map(v=>`<option value="${v}">${v}</option>`).join(''); }
+
+    const filters = mk('div','ref-filters');
+    filters.innerHTML = `
+      <input type="text" class="ref-search" id="rpSearch" placeholder="🔍 Поиск по названию..." />
+      <div class="ref-filter-row">
+        <select class="ref-filter-sel" id="rpCat">
+          <option value="">Все категории</option>${opts(cats)}
+        </select>
+        <select class="ref-filter-sel" id="rpStock">
+          <option value="">Все наличие</option>
+          <option value="in">В наличии</option>
+          <option value="low">Огранич.</option>
+          <option value="out">Нет</option>
+        </select>
+      </div>
+      <div class="ref-filter-row">
+        <select class="ref-filter-sel" id="rpBrand">
+          <option value="">Все бренды</option>${opts(brands)}
+        </select>
+        <select class="ref-filter-sel" id="rpColor">
+          <option value="">Все цвета</option>${opts(colors)}
+        </select>
+      </div>
+      <button class="boss-refresh" style="font-size:11px;padding:4px 10px;align-self:flex-start;margin-left:0"
+        onclick="resetRefProductsFilters()">✕ Сбросить фильтры</button>`;
+    body.appendChild(filters);
+
+    const listWrap = mk('div',''); listWrap.id='rpProductsList';
+    listWrap.style.cssText='display:flex;flex-direction:column;gap:8px;';
+    body.appendChild(listWrap);
+
+    const countBar = mk('div','ref-count-bar'); countBar.id='rpCountBar';
+    body.appendChild(countBar);
+
+    renderRefProducts();
+
+    ['rpSearch','rpCat','rpStock','rpBrand','rpColor'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.addEventListener('input', renderRefProducts); el.addEventListener('change', renderRefProducts); }
+    });
   }
   if (tab === 'faq') {
     const search = document.createElement('input');
@@ -1095,11 +1253,55 @@ function renderRefPanel(tab) {
   }
 }
 function makeProductCard(p) {
-  const div = mk('div','product-card'); div.dataset.name = p.name.toLowerCase();
-  const cls = {in:'in-stock',low:'low-stock',out:'out-stock'}[p.stock];
-  div.innerHTML = `<div class="pc-name">${p.name}</div><div class="pc-price">${p.price}</div><div class="pc-details">${p.details.replace(/\n/g,'<br>')}</div><div class="stock-badge ${cls}">${p.stockLabel}</div>`;
+  const div = mk('div','product-card'); div.dataset.name = (p.name||'').toLowerCase();
+  const cls = {in:'in-stock',low:'low-stock',out:'out-stock'}[p.stock] || 'out-stock';
+  const category = p.category ? `<div style="font-size:11px;color:var(--text-muted);margin-bottom:4px">${p.category}</div>` : '';
+  const price    = p.price    ? `<div class="pc-price">${p.price}</div>` : '';
+  const details  = p.details  ? `<div class="pc-details">${p.details.replace(/\n/g,'<br>')}</div>` : '';
+  div.innerHTML = `<div class="pc-name">${p.name}</div>${category}${price}${details}<div class="stock-badge ${cls}">${p.stockLabel||''}</div>`;
   return div;
 }
+function renderRefProducts() {
+  const search = (document.getElementById('rpSearch')?.value || '').toLowerCase();
+  const cat    =  document.getElementById('rpCat')?.value    || '';
+  const stock  =  document.getElementById('rpStock')?.value  || '';
+  const brand  =  document.getElementById('rpBrand')?.value  || '';
+  const color  =  document.getElementById('rpColor')?.value  || '';
+
+  const filtered = PRODUCTS_DATA.filter(p => {
+    if (cat   && p.category !== cat)                                    return false;
+    if (stock && p.stock    !== stock)                                  return false;
+    if (brand && (p.brand||'') !== brand)                              return false;
+    if (color && (p.color||'') !== color && (p.lensColor||'') !== color) return false;
+    if (search && !`${p.name} ${p.details}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const wrap = document.getElementById('rpProductsList');
+  const bar  = document.getElementById('rpCountBar');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  if (!PRODUCTS_DATA.length) {
+    const e=mk('div',''); e.style.cssText='text-align:center;padding:24px;color:var(--text-muted);font-size:13px';
+    e.textContent='Каталог товаров пуст. Обратитесь к начальнику.'; wrap.appendChild(e);
+  } else if (!filtered.length) {
+    const e=mk('div',''); e.style.cssText='text-align:center;padding:16px;color:var(--text-muted);font-size:12px';
+    e.textContent='Ничего не найдено. Измените фильтры.'; wrap.appendChild(e);
+  } else {
+    filtered.forEach(p => wrap.appendChild(makeProductCard(p)));
+  }
+  if (bar) bar.textContent = PRODUCTS_DATA.length
+    ? `Найдено ${filtered.length} из ${PRODUCTS_DATA.length}`
+    : '';
+}
+
+function resetRefProductsFilters() {
+  ['rpSearch'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  ['rpCat','rpStock','rpBrand','rpColor'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  renderRefProducts();
+}
+
 function makeFaqItem(f) {
   const div = mk('div','faq-item');
   div.innerHTML = `<div class="faq-q" onclick="this.parentElement.classList.toggle('open')">${f.q}<span class="arrow">▶</span></div><div class="faq-a">${f.a}</div>`;
@@ -1109,6 +1311,13 @@ function makeFaqItem(f) {
 /* ══════════ ALL CALLS SECTION ══════════ */
 let allCalls = [];
 let callsInitialized = false;
+
+/* ══════════ BOSS PRODUCTS SECTION ══════════ */
+let allBossProducts = [];
+let bossProductsInitialized = false;
+let bossProductsPage = 1;
+const BOSS_PRODUCTS_PER_PAGE = 20;
+let bossProductsSort = {field:'name', dir:1};
 
 function initCallsSection() {
   callsInitialized = true;
@@ -1242,7 +1451,194 @@ function renderCallsTable(calls, total) {
   if (cntBar) cntBar.innerHTML = `<span>Показано <strong>${calls.length}</strong> из ${total} записей</span>${calls.length<total?`<span style="color:var(--primary);margin-left:8px">· фильтр активен</span>`:''}`;
 }
 
+function initBossProductsSection() {
+  bossProductsInitialized = true;
+  document.getElementById('bossProductsSection').innerHTML = `
+    <div class="calls-filter-bar">
+      <input type="text" class="filter-inp" id="bpSearch" style="flex:1;min-width:180px"
+        placeholder="🔍 Название, артикул, модель..." oninput="applyBossProductsFilter()" />
+      <select class="filter-sel" id="bpCat"    onchange="applyBossProductsFilter()"><option value="">📦 Все категории</option></select>
+      <select class="filter-sel" id="bpBrand"  onchange="applyBossProductsFilter()"><option value="">🏭 Все производители</option></select>
+      <select class="filter-sel" id="bpStock"  onchange="applyBossProductsFilter()">
+        <option value="">📊 Всё наличие</option>
+        <option value="in">В наличии</option>
+        <option value="low">Ограниченно</option>
+        <option value="out">Нет в наличии</option>
+      </select>
+      <select class="filter-sel" id="bpGender" onchange="applyBossProductsFilter()"><option value="">👤 Все</option></select>
+      <button class="boss-refresh" onclick="resetBossProductsFilters()">✕ Сбросить</button>
+      <button class="boss-refresh" style="border-color:var(--primary);color:var(--primary)" onclick="reloadBossProducts()">🔄 Обновить</button>
+    </div>
+    <div class="calls-table-outer" id="bossProductsOuter">
+      <div class="calls-loading">⏳ Загружаем товары...</div>
+    </div>
+    <div class="pt-bottom" id="bossProductsBar"></div>`;
+  reloadBossProducts();
+}
+
+async function reloadBossProducts() {
+  const outer = document.getElementById('bossProductsOuter');
+  if (outer) outer.innerHTML = '<div class="calls-loading">⏳ Загружаем товары...</div>';
+  try {
+    const data = await api({action:'getProducts', token:app.session.token});
+    allBossProducts = (data.products || []).map(normalizeProduct);
+    populateBossProductFilters();
+    bossProductsPage = 1;
+    applyBossProductsFilter();
+  } catch(e) {
+    if (outer) outer.innerHTML = `<div class="calls-empty" style="color:var(--danger)">❌ ${e.message}</div>`;
+  }
+}
+
+function populateBossProductFilters() {
+  const cats   = [...new Set(allBossProducts.map(p=>p.category).filter(Boolean))].sort();
+  const brands = [...new Set(allBossProducts.map(p=>p.brand).filter(Boolean))].sort();
+  const genders = [...new Set(allBossProducts.map(p=>p.gender).filter(Boolean))].sort();
+  fillBossSelect('bpCat',    cats,    '📦 Все категории');
+  fillBossSelect('bpBrand',  brands,  '🏭 Все производители');
+  fillBossSelect('bpGender', genders, '👤 Все');
+}
+
+function fillBossSelect(id, values, placeholder) {
+  const sel = document.getElementById(id); if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>`;
+  values.forEach(v => { const o=document.createElement('option'); o.value=o.textContent=v; sel.appendChild(o); });
+  if (cur) sel.value = cur;
+}
+
+function applyBossProductsFilter() {
+  const search = (document.getElementById('bpSearch')?.value  || '').toLowerCase();
+  const cat    =  document.getElementById('bpCat')?.value     || '';
+  const brand  =  document.getElementById('bpBrand')?.value   || '';
+  const stock  =  document.getElementById('bpStock')?.value   || '';
+  const gender =  document.getElementById('bpGender')?.value  || '';
+
+  let filtered = allBossProducts.filter(p => {
+    if (cat    && p.category !== cat)   return false;
+    if (stock  && p.stock    !== stock) return false;
+    if (brand  && p.brand    !== brand) return false;
+    if (gender && p.gender   !== gender) return false;
+    if (search && !`${p.name} ${p.sku} ${p.model} ${p.brand} ${p.category}`.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  const f = bossProductsSort.field, d = bossProductsSort.dir;
+  filtered.sort((a,b) => {
+    const va=String(a[f]||'').toLowerCase(), vb=String(b[f]||'').toLowerCase();
+    return va<vb ? -d : va>vb ? d : 0;
+  });
+  bossProductsPage = Math.max(1, Math.min(bossProductsPage, Math.ceil(filtered.length/BOSS_PRODUCTS_PER_PAGE)||1));
+  renderBossProductsTable(filtered, allBossProducts.length);
+}
+
+function resetBossProductsFilters() {
+  const el = document.getElementById('bpSearch'); if (el) el.value='';
+  ['bpCat','bpBrand','bpStock','bpGender'].forEach(id => { const e=document.getElementById(id); if(e) e.value=''; });
+  bossProductsPage = 1; applyBossProductsFilter();
+}
+
+function sortBossProducts(field) {
+  bossProductsSort = bossProductsSort.field===field
+    ? {field, dir: bossProductsSort.dir * -1}
+    : {field, dir: 1};
+  bossProductsPage = 1; applyBossProductsFilter();
+}
+
+function goBossProductsPage(n) { bossProductsPage = n; applyBossProductsFilter(); }
+
+function renderBossProductsTable(filtered, total) {
+  const outer = document.getElementById('bossProductsOuter');
+  const bar   = document.getElementById('bossProductsBar');
+  if (!outer) return;
+
+  const perPage = BOSS_PRODUCTS_PER_PAGE;
+  const totalPages = Math.max(1, Math.ceil(filtered.length / perPage));
+  const start = (bossProductsPage - 1) * perPage;
+  const end   = Math.min(start + perPage, filtered.length);
+  const page  = filtered.slice(start, end);
+
+  if (!page.length) {
+    outer.innerHTML = '<div class="calls-empty">Нет товаров по выбранным фильтрам</div>';
+    if (bar) bar.innerHTML = `<span>0 из ${total} товаров</span><div></div>`;
+    return;
+  }
+
+  const sf = bossProductsSort.field, sd = bossProductsSort.dir;
+  function th(label, field, minW) {
+    const cls = sf===field ? (sd>0?'sort-asc':'sort-desc') : '';
+    return `<th class="${cls}" style="min-width:${minW||'80px'}" onclick="sortBossProducts('${field}')">${label}</th>`;
+  }
+  const sClass = s => s==='in'?'in-stock':s==='low'?'low-stock':'out-stock';
+
+  const rows = page.map(p => `<tr>
+    <td class="td-pname">${p.name}</td>
+    <td>${p.category}</td>
+    <td style="font-weight:600;color:var(--primary-dark)">${p.price}</td>
+    <td>${p.gender}</td>
+    <td>${p.country}</td>
+    <td>${p.brand}</td>
+    <td>${p.material}</td>
+    <td>${p.color}</td>
+    <td>${p.design}</td>
+    <td>${p.model}</td>
+    <td>${p.frameType}</td>
+    <td><span class="stock-badge ${sClass(p.stock)}">${p.stockLabel}</span></td>
+    <td style="font-family:monospace;font-size:11px">${p.sku}</td>
+    <td style="text-align:center">${p.bc}</td>
+    <td style="text-align:center">${p.dia}</td>
+    <td style="text-align:center">${p.sph}</td>
+    <td style="text-align:center">${p.packQty}</td>
+    <td>${p.replacement}</td>
+    <td>${p.lensColor}</td>
+  </tr>`).join('');
+
+  outer.innerHTML = `<table class="products-table"><thead><tr>
+    ${th('Название','name','160px')}
+    ${th('Категория','category')}
+    ${th('Цена','price')}
+    ${th('Пол','gender','70px')}
+    ${th('Страна','country')}
+    ${th('Производитель','brand')}
+    ${th('Материал','material')}
+    ${th('Цвет оправы','color')}
+    ${th('Дизайн','design')}
+    ${th('Модель','model')}
+    ${th('Тип оправы','frameType')}
+    ${th('Наличие','stock')}
+    ${th('Артикул','sku')}
+    ${th('BC','bc','58px')}
+    ${th('DIA','dia','58px')}
+    ${th('Sph','sph','58px')}
+    ${th('Кол-во','packQty','70px')}
+    ${th('Срок замены','replacement')}
+    ${th('Цвет линз','lensColor')}
+  </tr></thead><tbody>${rows}</tbody></table>`;
+
+  if (bar) {
+    const prevDis = bossProductsPage<=1 ? 'disabled' : '';
+    const nextDis = bossProductsPage>=totalPages ? 'disabled' : '';
+    const info = filtered.length < total
+      ? `Показано <strong>${start+1}–${end}</strong> из <strong>${filtered.length}</strong> (всего ${total})`
+      : `Показано <strong>${start+1}–${end}</strong> из <strong>${total}</strong> товаров`;
+    bar.innerHTML = `
+      <span>${info}</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="pt-page-btn" onclick="goBossProductsPage(${bossProductsPage-1})" ${prevDis}>← Назад</button>
+        <span style="color:var(--text-muted)">стр. ${bossProductsPage} из ${totalPages}</span>
+        <button class="pt-page-btn" onclick="goBossProductsPage(${bossProductsPage+1})" ${nextDis}>Вперёд →</button>
+      </div>`;
+  }
+}
+
 /* ══════════ SETUP MODAL ══════════ */
+
+// Принимает полную ссылку (https://docs.google.com/spreadsheets/d/ID/edit) или голый ID
+function extractSheetId(input) {
+  const m = input.match(/\/spreadsheets\/d\/([a-zA-Z0-9_-]+)/);
+  return m ? m[1] : input.trim();
+}
+
 function openSetup() {
   document.getElementById('sheetsUrlInput').value = app.scriptUrl;
   document.getElementById('sheetIdInput').value = app.sheetId;
@@ -1252,21 +1648,32 @@ function openSetup() {
 }
 function closeSetup() { document.getElementById('setupModal').classList.remove('open'); }
 function updateScriptCode() {
-  const id = document.getElementById('sheetIdInput').value.trim() || app.sheetId;
+  const raw = document.getElementById('sheetIdInput').value.trim();
+  const id = (raw ? extractSheetId(raw) : null) || app.sheetId;
   document.getElementById('scriptCode').textContent = generateScriptCode(id);
 }
-function saveScriptUrl() {
+async function saveScriptUrl() {
   const url = document.getElementById('sheetsUrlInput').value.trim();
-  const sid = document.getElementById('sheetIdInput').value.trim();
+  const raw = document.getElementById('sheetIdInput').value.trim();
+  const sid = raw ? extractSheetId(raw) : '';
   if (!url) { showNotif('⚠️', 'Введите URL скрипта', 'err'); return; }
   localStorage.setItem(STORAGE_KEY, url); app.scriptUrl = url;
   if (sid) {
     localStorage.setItem(SHEET_ID_KEY, sid); app.sheetId = sid;
+    // Показываем очищенный ID (без полного URL)
+    document.getElementById('sheetIdInput').value = sid;
     const lnk = document.getElementById('bossSheetLink');
     if (lnk) lnk.href = `https://docs.google.com/spreadsheets/d/${sid}/edit`;
   }
   document.getElementById('urlSavedBadge').classList.remove('hidden');
   showNotif('✅ Настройки сохранены', 'Интеграция активна', 'ok');
+  // Создаём лист «Товары» если ещё не создан (только при активной сессии)
+  if (app.session && app.session.token) {
+    try {
+      const res = await api({action:'ensureProductsSheet', token:app.session.token});
+      if (res.created) showNotif('📋 Лист создан', 'Лист «Товары» добавлен в таблицу', 'ok');
+    } catch(e) { /* некритичная ошибка — пропускаем */ }
+  }
 }
 function copyScript() {
   const code = document.getElementById('scriptCode').textContent;
@@ -1280,22 +1687,25 @@ document.getElementById('setupModal').addEventListener('click', e => { if (e.tar
 
 /* ══════════ SCRIPT CODE GENERATOR ══════════ */
 function generateScriptCode(sheetId) {
-  return `// ═══════ ПИТЕР ОПТИКА — Apps Script v2 ═══════
+  return `// ═══════ ПИТЕР ОПТИКА — Apps Script v3 ═══════
 const SHEET_ID = '${sheetId}';
 
 function doGet(e) {
   const p = e.parameter;
   try {
     switch (p.action) {
-      case 'login':       return r(login(p));
-      case 'setPassword': return r(setPassword(p));
-      case 'addUser':     return r(addUser(p));
-      case 'getUsers':    return r(getUsers(p));
-      case 'getStats':    return r(getStats(p));
-      case 'saveCall':    return r(saveCall(p));
-      case 'getSummary':  return r(getSummary(p));
-      case 'getCalls':    return r(getCalls(p));
-      default:            return r({error:'Unknown action'});
+      case 'login':               return r(login(p));
+      case 'setPassword':         return r(setPassword(p));
+      case 'addUser':             return r(addUser(p));
+      case 'getUsers':            return r(getUsers(p));
+      case 'getStats':            return r(getStats(p));
+      case 'saveCall':            return r(saveCall(p));
+      case 'getSummary':          return r(getSummary(p));
+      case 'getCalls':            return r(getCalls(p));
+      case 'checkProductsSheet':  return r(checkProductsSheet(p));
+      case 'ensureProductsSheet': return r(ensureProductsSheet(p));
+      case 'getProducts':         return r(getProducts(p));
+      default:                    return r({error:'Unknown action'});
     }
   } catch(err) { return r({error: err.message}); }
 }
@@ -1485,6 +1895,82 @@ function getCalls(p) {
     });
   }
   return {status:'ok', calls};
+}
+
+// ─── ТОВАРЫ ──────────────────────────────────────────────
+
+const PRODUCT_HEADERS = [
+  'Название','Категория','Цена','Пол','Страна производства','Производитель',
+  'Материал','Цвет оправы/аксессуара','Дизайн','Модель','Тип оправы',
+  'Наличие','Артикул','BC (Базовая кривизна)','DIA (Диаметр)','Сфера Sph',
+  'Количество в пачке','Срок замены','Цвет линз'
+];
+
+function pSheet() { return ss().getSheetByName('Товары'); }
+
+// Проверяет, существует ли лист «Товары»
+function checkProductsSheet(p) {
+  guard(p.token, 'boss');
+  return {status:'ok', exists: !!pSheet()};
+}
+
+// Создаёт лист «Товары» с заголовками и примерами, если его нет
+function ensureProductsSheet(p) {
+  guard(p.token, 'boss');
+  if (pSheet()) return {status:'ok', created:false, message:'Лист уже существует'};
+  const s = ss().insertSheet('Товары');
+  s.appendRow(PRODUCT_HEADERS);
+  s.getRange(1,1,1,PRODUCT_HEADERS.length)
+    .setFontWeight('bold').setBackground('#0C9970').setFontColor('#fff');
+  s.setFrozenRows(1);
+  // Примеры товаров
+  s.appendRow(['Очки Ray-Ban Aviator','Солнцезащитные','12 900 ₽','Унисекс',
+    'Италия','Ray-Ban','Металл','Золотой','Авиатор','RB3025','Полуободковая',
+    'Есть в наличии','RB-3025-001','','','','','','']);
+  s.appendRow(['Линзы Acuvue Oasys (6 шт)','Контактные линзы','1 850 ₽','Унисекс',
+    'США','Johnson & Johnson','Силикон-гидрогель','','','Oasys','',
+    'Есть в наличии','ACU-OAS-6','8.4','14.0','-2.50','6','2 недели','']);
+  s.appendRow(['Раствор Biotrue 300 мл','Аксессуары','680 ₽','','',
+    'Bausch+Lomb','','','','Biotrue 300','',
+    'Есть в наличии','BIO-300','','','','','','']);
+  return {status:'ok', created:true, message:'Лист «Товары» создан'};
+}
+
+// Читает каталог товаров из листа «Товары»
+function getProducts(p) {
+  // Доступно любому авторизованному пользователю
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const sheet = pSheet();
+  if (!sheet || sheet.getLastRow() <= 1) return {status:'ok', products:[]};
+  const data = sheet.getDataRange().getValues();
+  const products = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[0]) continue; // пропускаем пустые строки
+    products.push({
+      name:        String(row[0]  || ''),
+      category:    String(row[1]  || ''),
+      price:       String(row[2]  || ''),
+      gender:      String(row[3]  || ''),
+      country:     String(row[4]  || ''),
+      brand:       String(row[5]  || ''),
+      material:    String(row[6]  || ''),
+      color:       String(row[7]  || ''),
+      design:      String(row[8]  || ''),
+      model:       String(row[9]  || ''),
+      frameType:   String(row[10] || ''),
+      stock:       String(row[11] || ''),
+      sku:         String(row[12] || ''),
+      bc:          String(row[13] || ''),
+      dia:         String(row[14] || ''),
+      sph:         String(row[15] || ''),
+      packQty:     String(row[16] || ''),
+      replacement: String(row[17] || ''),
+      lensColor:   String(row[18] || ''),
+    });
+  }
+  return {status:'ok', products};
 }`;
 }
 
@@ -1503,6 +1989,13 @@ function mk(tag, cls) { const d=document.createElement(tag); if(cls) d.className
 
 /* ══════════ INIT ══════════ */
 (function init() {
+  // Скрываем подсказки на экране входа, если скрипт уже настроен
+  if (localStorage.getItem(STORAGE_KEY)) {
+    const hint = document.querySelector('.auth-hint');
+    const link = document.getElementById('setupLink');
+    if (hint) hint.style.display = 'none';
+    if (link) link.style.display = 'none';
+  }
   const saved = sessionStorage.getItem('po_session');
   if (saved) {
     try {
