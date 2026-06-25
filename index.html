@@ -298,7 +298,72 @@
   .ref-filter-sel{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;color:var(--text);font-size:12px;font-family:inherit;outline:none;width:100%;transition:border-color .2s;}
   .ref-filter-sel:focus{border-color:var(--primary);}
   .ref-count-bar{font-size:11px;color:var(--text-muted);text-align:center;padding:2px 0;flex-shrink:0;}
+
+  /* ── NOTES WIDGET ── */
+  .notes-trigger{position:fixed;bottom:28px;right:16px;width:48px;height:48px;border-radius:50%;background:#a8e0ff;border:none;font-size:22px;cursor:pointer;z-index:300;box-shadow:0 4px 14px rgba(43,164,232,.38);transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .notes-trigger:hover{transform:scale(1.12);background:#7ecdf7;}
+  .notes-panel{position:fixed;top:0;right:-20%;width:18%;height:100vh;background:#EBF5FD;border-left:2px solid #C0D9EE;z-index:200;display:flex;flex-direction:column;transition:right .3s ease;box-shadow:-4px 0 20px rgba(13,36,71,.12);}
+  .notes-panel.open{right:0;}
+  .notes-header{padding:14px 16px 12px;background:#2BA4E8;border-bottom:1px solid rgba(255,255,255,.18);flex-shrink:0;display:flex;align-items:center;gap:8px;}
+  .notes-header-title{font-family:'Permanent Marker',cursive;font-size:17px;color:#fff;flex:1;}
+  .notes-close{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .notes-close:hover{background:rgba(255,255,255,.15);}
+  .notes-list{flex:1;overflow-y:auto;padding:12px 12px 4px;display:flex;flex-direction:column;gap:10px;}
+  .note-card{background:#FFF9C4;border-radius:4px;box-shadow:2px 3px 8px rgba(0,0,0,.12);overflow:hidden;cursor:default;user-select:none;transition:opacity .26s,transform .26s;}
+  .note-card.removing{opacity:0;transform:scale(.84);}
+  .note-card-ghost{opacity:.35;}
+  .note-card-chosen{box-shadow:0 6px 18px rgba(43,164,232,.28);}
+  .note-card-header{background:#FDD835;padding:6px 10px;display:flex;align-items:center;gap:6px;min-height:32px;cursor:grab;}
+  .note-card-header:active{cursor:grabbing;}
+  .note-card-title{font-family:'Permanent Marker',cursive;font-size:13px;font-weight:700;color:#4A3200;flex:1;word-break:break-word;}
+  .note-card-delete{width:22px;height:22px;border:none;background:transparent;color:#E53935;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;line-height:1;transition:transform .15s;}
+  .note-card-delete:hover{transform:scale(1.25);}
+  .note-card-body{padding:10px 10px 4px;cursor:text;}
+  .note-card-text{font-family:'Permanent Marker',cursive;font-size:14px;color:#3E2800;line-height:1.6;white-space:pre-wrap;word-break:break-word;}
+  .note-check-line{font-family:'Permanent Marker',cursive;font-size:14px;color:#3E2800;line-height:1.75;display:flex;align-items:flex-start;gap:4px;cursor:default;}
+  .note-check-line.checked{color:#BDBDBD;text-decoration:line-through;}
+  .note-checkbox{cursor:pointer;font-size:17px;line-height:1.4;user-select:none;transition:transform .1s;flex-shrink:0;}
+  .note-checkbox:hover{transform:scale(1.2);}
+  .notes-inline-ta{width:100%;background:#FFF9C4;border:1px solid #FDD835;border-radius:6px;padding:6px 8px;font-family:'Permanent Marker',cursive;font-size:13px;color:#3E2800;outline:none;resize:vertical;box-sizing:border-box;min-height:60px;}
+  .notes-inline-ta:focus{border-color:#FBC02D;}
+  .notes-inline-btns{display:flex;gap:6px;margin-top:6px;}
+  .note-card-date{font-family:'Permanent Marker',cursive;font-size:11px;color:#BDBDBD;text-align:right;padding:4px 10px 8px;}
+  .notes-add-btn{margin:8px 12px 12px;padding:10px;background:#2BA4E8;border:2px dashed #C0D9EE;border-radius:8px;color:#fff;font-family:'Permanent Marker',cursive;font-size:14px;cursor:pointer;transition:all .15s;flex-shrink:0;}
+  .notes-add-btn:hover{background:#1A7DC0;}
+  .notes-form{display:none;margin:0 12px 8px;background:#fff;border:1px solid #C0D9EE;border-radius:8px;padding:12px;flex-shrink:0;}
+  .notes-form.open{display:block;}
+  .notes-form-input{width:100%;background:#FFF9C4;border:1px solid #FDD835;border-radius:6px;padding:7px 10px;font-family:'Permanent Marker',cursive;font-size:13px;color:#3E2800;outline:none;margin-bottom:6px;transition:border-color .2s;box-sizing:border-box;}
+  .notes-form-input:focus{border-color:#FBC02D;box-shadow:0 0 0 3px rgba(251,192,45,.2);}
+  .notes-form-input::placeholder{color:#BDBDBD;}
+  .notes-tags{display:none;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+  .notes-tags.visible{display:flex;}
+  .note-tag-btn{padding:2px 8px;background:#FDD835;border:1px solid #FBC02D;border-radius:12px;font-size:11px;color:#4A3200;cursor:pointer;transition:all .15s;}
+  .note-tag-btn:hover{background:#FBC02D;}
+  .notes-textarea{width:100%;background:#FFF9C4;border:1px solid #FDD835;border-radius:6px;padding:7px 10px;font-family:'Permanent Marker',cursive;font-size:13px;color:#3E2800;outline:none;resize:vertical;min-height:80px;transition:border-color .2s;box-sizing:border-box;}
+  .notes-textarea:focus{border-color:#FBC02D;box-shadow:0 0 0 3px rgba(251,192,45,.2);}
+  .notes-textarea::placeholder{color:#BDBDBD;}
+  .notes-fmt-row{display:flex;gap:6px;margin-top:6px;}
+  .notes-fmt-btn{padding:4px 10px;background:#FFF9C4;border:1px solid #FDD835;border-radius:6px;font-size:13px;color:#4A3200;cursor:pointer;transition:all .15s;}
+  .notes-fmt-btn:hover{background:#FDD835;}
+  .notes-form-actions{display:flex;gap:8px;margin-top:10px;}
+  .notes-submit-btn{flex:1;padding:8px;background:#2BA4E8;border:none;border-radius:7px;font-family:'Permanent Marker',cursive;font-size:14px;color:#fff;cursor:pointer;transition:all .15s;}
+  .notes-submit-btn:hover{background:#1A7DC0;}
+  .notes-cancel-btn{padding:8px 14px;background:transparent;border:1px solid #C0D9EE;border-radius:7px;font-size:13px;color:#9E9E9E;cursor:pointer;transition:all .15s;}
+  .notes-cancel-btn:hover{border-color:#E53935;color:#E53935;}
+
+  /* ── FEEDBACK MODAL ── */
+  .fb-editor{min-height:200px;max-height:360px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px;color:var(--text);background:var(--surface2);outline:none;line-height:1.7;transition:border-color .2s;word-wrap:break-word;}
+  .fb-editor:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,164,232,.1);}
+  .fb-editor:empty::before{content:attr(placeholder);color:var(--text-muted);pointer-events:none;display:block;}
+  .fb-editor img{max-width:100%;border-radius:6px;margin:6px 0;display:block;}
+  .fb-thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;min-height:0;}
+  .fb-thumb-wrap{position:relative;width:80px;height:80px;border-radius:6px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;}
+  .fb-thumb-wrap img{width:100%;height:100%;object-fit:cover;}
+  .fb-thumb-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(229,62,62,.88);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
+  .fb-thumb-del:hover{background:#E53935;}
 </style>
+<link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
 </head>
 <body>
 
@@ -385,6 +450,7 @@
     <button class="btn btn-primary" onclick="openAddUserModal()">➕ Добавить сотрудника</button>
     <a id="bossSheetLink" class="btn btn-ghost" href="#" target="_blank" rel="noopener"
        style="text-decoration:none;display:flex;align-items:center;gap:5px;">📊 Таблица</a>
+    <div class="icon-btn" onclick="openFeedbackModal()" title="Отправить правку">✉️</div>
     <div class="icon-btn" onclick="openSetup()" title="Настройки">⚙</div>
     <div class="icon-btn" onclick="logout()" title="Выйти">↪</div>
   </div>
@@ -398,6 +464,36 @@
   </div>
   <div class="boss-calls-wrap hidden" id="bossCallsSection"></div>
   <div class="boss-calls-wrap hidden" id="bossProductsSection"></div>
+
+  <!-- Notes Widget (boss only) -->
+  <button class="notes-trigger" onclick="toggleNotesPanel()" title="Заметки">📌</button>
+  <div class="notes-panel" id="notesPanel">
+    <div class="notes-header">
+      <div class="notes-header-title">📌 Мои заметки</div>
+      <button class="notes-close" onclick="toggleNotesPanel()">✕</button>
+    </div>
+    <div class="notes-list" id="notesList"></div>
+    <div class="notes-form" id="notesForm">
+      <input type="text" class="notes-form-input" id="notesTitleIn" placeholder="Заголовок..." />
+      <div class="notes-tags" id="notesTagsRow">
+        <button class="note-tag-btn" type="button" onclick="notesInsertTag('#идея')">#идея</button>
+        <button class="note-tag-btn" type="button" onclick="notesInsertTag('#задача')">#задача</button>
+        <button class="note-tag-btn" type="button" onclick="notesInsertTag('#вопрос')">#вопрос</button>
+        <button class="note-tag-btn" type="button" onclick="notesInsertTag('#напомнить')">#напомнить</button>
+      </div>
+      <textarea class="notes-textarea" id="notesTextIn" placeholder="Текст заметки..."
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();notesSubmit();}"></textarea>
+      <div class="notes-fmt-row">
+        <button class="notes-fmt-btn" type="button" onclick="notesFormat('checklist')" title="Чек-лист">◻</button>
+        <button class="notes-fmt-btn" type="button" onclick="notesFormat('bullets')" title="Маркированный список">•</button>
+      </div>
+      <div class="notes-form-actions">
+        <button class="notes-submit-btn" type="button" onclick="notesSubmit()">Создать</button>
+        <button class="notes-cancel-btn" type="button" onclick="notesCancel()">Отмена</button>
+      </div>
+    </div>
+    <button class="notes-add-btn" id="notesAddBtn" onclick="notesOpenForm()">Добавить заметку</button>
+  </div>
 </div>
 
 <!-- ═══ SCREEN: MANAGER ═══ -->
@@ -511,6 +607,28 @@
       <button class="btn btn-ghost" onclick="closeAddUserModal()">Отмена</button>
     </div>
     <div id="addUserResult" style="margin-top:12px;font-size:13px;display:none;line-height:1.5"></div>
+  </div>
+</div>
+
+<!-- ═══ FEEDBACK MODAL ═══ -->
+<div class="modal-overlay" id="feedbackModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeFeedbackModal()">✕</div>
+    <h2>✉️ Отправить правку</h2>
+    <div class="modal-sub">Опишите правку текстом и при необходимости добавьте скриншоты. Письмо придёт на почту администратора.</div>
+    <div class="fb-editor" id="fbEditor" contenteditable="true"
+         placeholder="Введите текст правки..."></div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap;">
+      <button class="btn btn-ghost" onclick="fbAddImageClick()">🖼 Добавить картинку</button>
+      <span id="fbImgCount" style="font-size:12px;color:var(--text-muted)">0 / 5 картинок</span>
+    </div>
+    <input type="file" id="fbFileInput" accept="image/png,image/jpeg,image/gif" style="display:none"
+           multiple onchange="fbHandleFiles(this.files)" />
+    <div class="fb-thumbs" id="fbThumbs"></div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary" id="fbSendBtn" onclick="fbSend()">📤 Отправить</button>
+      <button class="btn btn-ghost" onclick="closeFeedbackModal()">Отмена</button>
+    </div>
   </div>
 </div>
 
@@ -1710,6 +1828,14 @@ function doGet(e) {
   } catch(err) { return r({error: err.message}); }
 }
 
+function doPost(e) {
+  try {
+    const p = JSON.parse(e.postData.contents);
+    if (p.action === 'sendFeedbackWithImages') return r(sendFeedbackWithImages(p));
+    return r({error: 'Unknown POST action'});
+  } catch(err) { return r({error: err.message}); }
+}
+
 function r(d) {
   return ContentService.createTextOutput(JSON.stringify(d))
     .setMimeType(ContentService.MimeType.JSON);
@@ -1971,6 +2097,72 @@ function getProducts(p) {
     });
   }
   return {status:'ok', products};
+}
+
+function sendFeedbackWithImages(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+
+  const author     = p.author || s[1] || 'Начальник';
+  const textHtml   = p.text  || '';
+  const images     = p.images     || [];
+  const imageMimes = p.imageMimes || [];
+  const dateStr    = new Date().toLocaleString('ru-RU');
+
+  Logger.log('[sendFeedback] author: ' + author);
+  Logger.log('[sendFeedback] images.length: ' + images.length);
+  Logger.log('[sendFeedback] textHtml (200): ' + textHtml.substring(0, 200));
+
+  // Replace [Изображение N] placeholders with <img src="cid:imgN"> and build inlineImages map
+  const inlineImages = {};
+  let bodyHtml = textHtml;
+  images.forEach((b64, i) => {
+    const mime = imageMimes[i] || 'image/jpeg';
+    const ext  = mime === 'image/png' ? 'png' : mime === 'image/gif' ? 'gif' : 'jpg';
+    const name = 'screenshot' + (i + 1) + '.' + ext;
+    const blob = Utilities.newBlob(Utilities.base64Decode(b64), mime, name);
+    inlineImages['img' + i] = blob;
+    Logger.log('[sendFeedback] img' + i + ' blob bytes: ' + blob.getBytes().length);
+    bodyHtml = bodyHtml.replace(
+      '[Изображение ' + (i + 1) + ']',
+      '<img src="cid:img' + i + '" style="max-width:100%;border-radius:6px;margin:6px 0;display:block;">'
+    );
+  });
+
+  Logger.log('[sendFeedback] inlineImages keys: ' + Object.keys(inlineImages).join(', '));
+  Logger.log('[sendFeedback] bodyHtml (300): ' + bodyHtml.substring(0, 300));
+
+  const emailHtml = '<!DOCTYPE html><html><head><meta charset="UTF-8">' +
+    '<style>body{font-family:Arial,sans-serif;color:#0D2447;max-width:680px;margin:0 auto;padding:20px}' +
+    '.hd{background:#2BA4E8;color:#fff;padding:18px 24px;border-radius:8px 8px 0 0}' +
+    '.hd h1{margin:0;font-size:18px;font-weight:700}' +
+    '.meta{background:#EBF5FD;padding:10px 24px;font-size:13px;color:#5B7FA6;border-left:4px solid #2BA4E8}' +
+    '.bd{padding:20px 24px;background:#fff;border:1px solid #C0D9EE;border-top:none;border-radius:0 0 8px 8px;font-size:15px;line-height:1.8}' +
+    '.ft{margin-top:16px;font-size:12px;color:#9E9E9E;text-align:center}</style></head><body>' +
+    '<div class="hd"><h1>Правка от начальника</h1></div>' +
+    '<div class="meta"><strong>От:</strong> ' + author + ' &nbsp;·&nbsp; <strong>Дата:</strong> ' + dateStr + '</div>' +
+    '<div class="bd">' + bodyHtml + '</div>' +
+    '<div class="ft">Питер Оптика — система тренажёра менеджеров</div>' +
+    '</body></html>';
+
+  const plainFallback = author + ' отправил(а) правку ' + dateStr + ': ' +
+    textHtml.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim().substring(0, 500);
+
+  GmailApp.sendEmail(
+    'bark8360@yandex.ru',
+    'Правка от начальника — Питер Оптика',
+    plainFallback,
+    { htmlBody: emailHtml, inlineImages: inlineImages, name: 'Питер Оптика — Тренажёр' }
+  );
+
+  Logger.log('[sendFeedback] email sent OK via GmailApp');
+  return {status: 'ok', sent: true};
+}
+
+// Запустите эту функцию один раз в редакторе Apps Script для авторизации GmailApp
+function triggerMailAuth() {
+  const count = GmailApp.getInboxUnreadCount();
+  Logger.log('GmailApp авторизован. Непрочитанных писем: ' + count);
 }`;
 }
 
@@ -2011,6 +2203,392 @@ function mk(tag, cls) { const d=document.createElement(tag); if(cls) d.className
   showScreen('screenLogin');
   document.getElementById('scriptCode').textContent = generateScriptCode(app.sheetId);
 })();
+
+/* ══════════ NOTES WIDGET ══════════ */
+const NOTES_KEY = 'boss_notes';
+let _notesSortable = null;
+
+function notesLoad() {
+  try { return JSON.parse(localStorage.getItem(NOTES_KEY) || '[]'); } catch(e) { return []; }
+}
+
+function notesSave(notes) {
+  localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
+}
+
+function toggleNotesPanel() {
+  const panel = document.getElementById('notesPanel');
+  const isOpen = panel.classList.toggle('open');
+  if (isOpen) notesRender();
+}
+
+function notesRender() {
+  const container = document.getElementById('notesList');
+  if (!container) return;
+  const notes = notesLoad();
+  if (!notes.length) {
+    container.innerHTML = '<div style="text-align:center;padding:24px 12px;font-family:\'Permanent Marker\',cursive;color:#BDBDBD;font-size:13px">Заметок пока нет 📝</div>';
+    if (_notesSortable) { _notesSortable.destroy(); _notesSortable = null; }
+    return;
+  }
+  container.innerHTML = '';
+  notes.forEach(note => container.appendChild(notesBuildCard(note)));
+  notesInitSortable();
+}
+
+function notesInitSortable() {
+  const list = document.getElementById('notesList');
+  if (!list || typeof Sortable === 'undefined') return;
+  if (_notesSortable) _notesSortable.destroy();
+  _notesSortable = Sortable.create(list, {
+    animation: 150,
+    handle: '.note-card-header',
+    ghostClass: 'note-card-ghost',
+    chosenClass: 'note-card-chosen',
+    onEnd: notesSaveOrder
+  });
+}
+
+function notesRenderText(note) {
+  if (note.type !== 'checklist') {
+    return `<div class="note-card-text">${notesEsc(note.text)}</div>`;
+  }
+  const lines = note.text.split('\n');
+  const rows = lines.map((line, i) => {
+    const checked = line.startsWith('[x] ') || line.startsWith('[X] ');
+    const unchecked = line.startsWith('[ ] ');
+    if (checked || unchecked) {
+      const content = notesEsc(line.slice(4));
+      const sym = checked ? '☑' : '☐';
+      const cls = checked ? 'note-check-line checked' : 'note-check-line';
+      return `<div class="${cls}"><span class="note-checkbox" onclick="event.stopPropagation();notesToggleCheck('${note.id}',${i})">${sym}</span><span>${content}</span></div>`;
+    }
+    return `<div class="note-card-text" style="margin-bottom:2px">${notesEsc(line)}</div>`;
+  }).join('');
+  return `<div>${rows}</div>`;
+}
+
+function notesBuildCard(note) {
+  const card = document.createElement('div');
+  card.className = 'note-card';
+  card.dataset.id = note.id;
+
+  const d = new Date(note.created);
+  const pad = v => String(v).padStart(2,'0');
+  const dateStr = `${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
+
+  card.innerHTML = `
+    <div class="note-card-header">
+      <div class="note-card-title">${notesEsc(note.title)}</div>
+      <button class="note-card-delete" title="Удалить заметку" onclick="notesDelete('${note.id}')">📌</button>
+    </div>
+    <div class="note-card-body">
+      ${notesRenderText(note)}
+    </div>
+    <div class="note-card-date">${dateStr}</div>`;
+
+  card.querySelector('.note-card-body').addEventListener('click', e => {
+    if (!e.target.classList.contains('note-checkbox')) notesEditText(note.id);
+  });
+
+  return card;
+}
+
+function notesSaveOrder() {
+  const notes = notesLoad();
+  const ids = [...document.querySelectorAll('#notesList .note-card')].map(c => c.dataset.id);
+  const sorted = ids.map(id => notes.find(n => n.id === id)).filter(Boolean);
+  sorted.forEach((n, i) => n.order = i);
+  notesSave(sorted);
+}
+
+function notesDelete(id) {
+  const card = document.querySelector(`.note-card[data-id="${id}"]`);
+  if (!card) return;
+  card.classList.add('removing');
+  setTimeout(() => {
+    notesSave(notesLoad().filter(n => n.id !== id));
+    notesRender();
+  }, 270);
+}
+
+function notesToggleCheck(id, lineIndex) {
+  const notes = notesLoad();
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  const lines = note.text.split('\n');
+  if (lineIndex >= lines.length) return;
+  const line = lines[lineIndex];
+  if (line.startsWith('[ ] '))      lines[lineIndex] = '[x] ' + line.slice(4);
+  else if (line.startsWith('[x] ') || line.startsWith('[X] '))
+                                    lines[lineIndex] = '[ ] ' + line.slice(4);
+  note.text = lines.join('\n');
+  notesSave(notes);
+  notesRender();
+}
+
+function notesEditText(id) {
+  const card = document.querySelector(`.note-card[data-id="${id}"]`);
+  if (!card) return;
+  const body = card.querySelector('.note-card-body');
+  if (body.querySelector('.notes-inline-ta')) return;
+  const note = notesLoad().find(n => n.id === id);
+  if (!note) return;
+  body.innerHTML = `
+    <textarea class="notes-inline-ta"
+      onclick="event.stopPropagation()"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();event.stopPropagation();notesSaveInline('${id}');}if(event.key==='Escape'){event.stopPropagation();notesCancelInline();}"
+    >${notesEsc(note.text)}</textarea>
+    <div class="notes-inline-btns">
+      <button class="notes-submit-btn" style="flex:1;padding:5px;font-size:12px;background:#FDD835;color:#000"
+        onclick="event.stopPropagation();notesSaveInline('${id}')">Сохранить</button>
+      <button class="notes-cancel-btn" style="padding:5px 10px;font-size:12px"
+        onclick="event.stopPropagation();notesCancelInline()">✕</button>
+    </div>`;
+  body.querySelector('.notes-inline-ta').focus();
+}
+
+function notesSaveInline(id) {
+  const card = document.querySelector(`.note-card[data-id="${id}"]`);
+  if (!card) return;
+  const ta = card.querySelector('.notes-inline-ta');
+  if (!ta) return;
+  const newText = ta.value.trim();
+  if (!newText) return;
+  const notes = notesLoad();
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  note.text = newText;
+  note.type = newText.includes('[ ]') ? 'checklist' : newText.startsWith('• ') ? 'bullets' : 'text';
+  notesSave(notes);
+  notesRender();
+}
+
+function notesCancelInline() {
+  notesRender();
+}
+
+function notesOpenForm() {
+  document.getElementById('notesForm').classList.add('open');
+  document.getElementById('notesAddBtn').style.display = 'none';
+  document.getElementById('notesTagsRow').classList.add('visible');
+  document.getElementById('notesTitleIn').focus();
+}
+
+function notesCancel() {
+  document.getElementById('notesForm').classList.remove('open');
+  document.getElementById('notesAddBtn').style.display = '';
+  document.getElementById('notesTitleIn').value = '';
+  document.getElementById('notesTextIn').value = '';
+  document.getElementById('notesTagsRow').classList.remove('visible');
+}
+
+function notesInsertTag(tag) {
+  const el = document.getElementById('notesTitleIn');
+  el.value = el.value ? el.value + ' ' + tag : tag;
+  el.focus();
+}
+
+function notesFormat(type) {
+  const ta = document.getElementById('notesTextIn');
+  const lines = ta.value.split('\n').filter(l => l.trim());
+  if (!lines.length) return;
+  if (type === 'checklist') ta.value = lines.map(l => '[ ] ' + l.replace(/^\[[ x]\] |^• /u, '')).join('\n');
+  else ta.value = lines.map(l => '• ' + l.replace(/^\[[ x]\] |^• /u, '')).join('\n');
+}
+
+function notesSubmit() {
+  const titleEl = document.getElementById('notesTitleIn');
+  const textEl  = document.getElementById('notesTextIn');
+  const text    = textEl.value.trim();
+  if (!text) { textEl.focus(); return; }
+  const title = titleEl.value.trim() || 'Заметка';
+  const type  = text.includes('[ ]') ? 'checklist' : text.startsWith('• ') ? 'bullets' : 'text';
+  const note  = {
+    id:      Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+    title, text, type,
+    created: new Date().toISOString(),
+    order:   0
+  };
+  const notes = notesLoad();
+  notes.unshift(note);
+  notes.forEach((n, i) => n.order = i);
+  notesSave(notes);
+  notesCancel();
+  notesRender();
+}
+
+function notesEsc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ══════════ FEEDBACK MODAL ══════════ */
+let _fbImages = [];
+
+function openFeedbackModal() {
+  _fbImages = [];
+  const editor = document.getElementById('fbEditor');
+  if (editor) editor.innerHTML = '';
+  document.getElementById('fbThumbs').innerHTML = '';
+  document.getElementById('fbImgCount').textContent = '0 / 5 картинок';
+  document.getElementById('fbFileInput').value = '';
+  const btn = document.getElementById('fbSendBtn');
+  btn.disabled = false; btn.textContent = '📤 Отправить';
+  document.getElementById('feedbackModal').classList.add('open');
+  setTimeout(() => editor && editor.focus(), 120);
+}
+
+function closeFeedbackModal() {
+  document.getElementById('feedbackModal').classList.remove('open');
+  _fbImages = [];
+}
+
+document.getElementById('feedbackModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeFeedbackModal();
+});
+
+function fbAddImageClick() {
+  if (_fbImages.length >= 5) { showNotif('⚠️ Лимит', 'Максимум 5 картинок', 'err'); return; }
+  document.getElementById('fbFileInput').click();
+}
+
+function fbHandleFiles(files) {
+  const allowed = ['image/png','image/jpeg','image/gif'];
+  Array.from(files).forEach(file => {
+    if (_fbImages.length >= 5) { showNotif('⚠️ Лимит', 'Максимум 5 картинок', 'err'); return; }
+    if (!allowed.includes(file.type)) { showNotif('⚠️ Формат', 'Поддерживаются: PNG, JPG, GIF', 'err'); return; }
+    if (file.size > 1024 * 1024) { showNotif('⚠️ Размер', `«${file.name}» больше 1 МБ`, 'err'); return; }
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const id = 'fbimg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      _fbImages.push({ id, dataUrl: ev.target.result, name: file.name, mime: file.type });
+      fbInsertImageAtCursor(id, ev.target.result);
+      fbRenderThumbs();
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('fbFileInput').value = '';
+}
+
+function fbInsertImageAtCursor(id, dataUrl) {
+  const editor = document.getElementById('fbEditor');
+  const img = document.createElement('img');
+  img.src = dataUrl;
+  img.dataset.fbid = id;
+  img.style.cssText = 'max-width:100%;border-radius:6px;margin:6px 0;display:block;';
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0 && editor.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    range.insertNode(img);
+    range.setStartAfter(img);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  } else {
+    editor.appendChild(img);
+  }
+  editor.focus();
+}
+
+function fbRenderThumbs() {
+  const container = document.getElementById('fbThumbs');
+  const counter   = document.getElementById('fbImgCount');
+  if (counter) counter.textContent = `${_fbImages.length} / 5 картинок`;
+  if (!container) return;
+  container.innerHTML = '';
+  _fbImages.forEach((img, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'fb-thumb-wrap';
+    const pic = document.createElement('img');
+    pic.src = img.dataUrl;
+    pic.alt = img.name;
+    const del = document.createElement('button');
+    del.className = 'fb-thumb-del';
+    del.title = 'Удалить';
+    del.textContent = '✕';
+    del.onclick = () => fbRemoveImage(i);
+    wrap.appendChild(pic);
+    wrap.appendChild(del);
+    container.appendChild(wrap);
+  });
+}
+
+function fbRemoveImage(idx) {
+  const removed = _fbImages.splice(idx, 1)[0];
+  if (removed) {
+    const imgEl = document.getElementById('fbEditor').querySelector(`img[data-fbid="${removed.id}"]`);
+    if (imgEl) imgEl.remove();
+  }
+  fbRenderThumbs();
+}
+
+function fbResizeImage(dataUrl, maxW, quality) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = img.width > maxW ? maxW / img.width : 1;
+      const canvas = document.createElement('canvas');
+      canvas.width  = Math.round(img.width  * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = dataUrl;
+  });
+}
+
+async function fbSend() {
+  const editor = document.getElementById('fbEditor');
+  if (!editor.innerText.trim() && !editor.querySelector('img')) {
+    showNotif('⚠️ Пусто', 'Введите текст правки', 'err'); return;
+  }
+  const btn = document.getElementById('fbSendBtn');
+  btn.disabled = true; btn.textContent = '⏳ Отправляем...';
+  try {
+    // Replace editor <img> tags with text placeholders so GAS can do the cid: mapping
+    const clone = editor.cloneNode(true);
+    clone.querySelectorAll('img[data-fbid]').forEach((el, i) => {
+      el.replaceWith(`[Изображение ${i + 1}]`);
+    });
+    const textHtml = clone.innerHTML;
+    console.log('[fbSend] textHtml (300):', textHtml.substring(0, 300));
+    console.log('[fbSend] _fbImages.length:', _fbImages.length);
+
+    // Resize images
+    const imagesB64 = [], imageMimes = [];
+    for (const fbImg of _fbImages) {
+      const resized = await fbResizeImage(fbImg.dataUrl, 900, 0.82);
+      imagesB64.push(resized.split(',')[1]);
+      imageMimes.push('image/jpeg');
+    }
+    console.log('[fbSend] imagesB64.length:', imagesB64.length, '| b64 lengths:', imagesB64.map(b => b.length));
+
+    const payload = JSON.stringify({
+      action:     'sendFeedbackWithImages',
+      token:      app.session.token,
+      author:     app.session.username,
+      text:       textHtml,
+      images:     imagesB64,
+      imageMimes
+    });
+
+    const res = await fetch(app.scriptUrl, {
+      method:  'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body:    payload
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    showNotif('✅ Письмо отправлено!', 'Правка успешно отправлена администратору', 'ok');
+    btn.textContent = '✅ Отправлено';
+    setTimeout(() => closeFeedbackModal(), 2000);
+  } catch(e) {
+    showNotif('❌ Ошибка', e.message, 'err');
+    btn.disabled = false; btn.textContent = '📤 Отправить';
+  }
+}
 </script>
 </body>
 </html>
