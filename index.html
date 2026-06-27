@@ -300,10 +300,10 @@
   .ref-count-bar{font-size:11px;color:var(--text-muted);text-align:center;padding:2px 0;flex-shrink:0;}
 
   /* ── NOTES WIDGET ── */
-  .notes-trigger{position:fixed;bottom:28px;right:16px;width:48px;height:48px;border-radius:50%;background:#a8e0ff;border:none;font-size:22px;cursor:pointer;z-index:300;box-shadow:0 4px 14px rgba(43,164,232,.38);transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .notes-trigger{position:fixed;bottom:28px;left:16px;width:48px;height:48px;border-radius:50%;background:#a8e0ff;border:none;font-size:22px;cursor:pointer;z-index:300;box-shadow:0 4px 14px rgba(43,164,232,.38);transition:all .15s;display:flex;align-items:center;justify-content:center;}
   .notes-trigger:hover{transform:scale(1.12);background:#7ecdf7;}
-  .notes-panel{position:fixed;top:0;right:-20%;width:18%;height:100vh;background:#EBF5FD;border-left:2px solid #C0D9EE;z-index:200;display:flex;flex-direction:column;transition:right .3s ease;box-shadow:-4px 0 20px rgba(13,36,71,.12);}
-  .notes-panel.open{right:0;}
+  .notes-panel{position:fixed;top:0;left:-20%;width:18%;height:100vh;background:#EBF5FD;border-right:2px solid #C0D9EE;z-index:200;display:flex;flex-direction:column;transition:left .3s ease;box-shadow:4px 0 20px rgba(13,36,71,.12);}
+  .notes-panel.open{left:0;}
   .notes-header{padding:14px 16px 12px;background:#2BA4E8;border-bottom:1px solid rgba(255,255,255,.18);flex-shrink:0;display:flex;align-items:center;gap:8px;}
   .notes-header-title{font-family:'Permanent Marker',cursive;font-size:17px;color:#fff;flex:1;}
   .notes-close{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
@@ -351,6 +351,38 @@
   .notes-cancel-btn{padding:8px 14px;background:transparent;border:1px solid #C0D9EE;border-radius:7px;font-size:13px;color:#9E9E9E;cursor:pointer;transition:all .15s;}
   .notes-cancel-btn:hover{border-color:#E53935;color:#E53935;}
 
+  /* ── CHAT WIDGET ── */
+  .chat-trigger{position:fixed;bottom:28px;right:16px;width:48px;height:48px;border-radius:50%;background:#a8e0ff;border:none;font-size:20px;cursor:pointer;z-index:300;box-shadow:0 4px 14px rgba(43,164,232,.38);transition:all .15s;display:flex;align-items:center;justify-content:center;}
+  .chat-trigger:hover{transform:scale(1.12);background:#7ecdf7;}
+  .chat-unread{position:absolute;top:-3px;right:-3px;background:var(--danger);color:#fff;border-radius:50%;min-width:18px;height:18px;font-size:10px;font-weight:700;display:none;align-items:center;justify-content:center;padding:0 3px;line-height:1;border:2px solid #fff;}
+  .chat-unread.show{display:flex;}
+  .chat-panel{position:fixed;top:0;right:-22%;width:20%;min-width:260px;height:100vh;background:var(--surface);border-left:2px solid var(--border);z-index:200;display:flex;flex-direction:column;transition:right .3s ease;box-shadow:-4px 0 20px rgba(13,36,71,.12);}
+  .chat-panel.open{right:0;}
+  .chat-hd{padding:14px 16px 12px;background:var(--primary);flex-shrink:0;display:flex;align-items:center;gap:8px;}
+  .chat-hd-title{font-size:15px;font-weight:700;color:#fff;flex:1;}
+  .chat-close-btn{width:28px;height:28px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:transparent;color:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+  .chat-close-btn:hover{background:rgba(255,255,255,.15);}
+  .chat-clear-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.35);cursor:pointer;font-size:12px;padding:4px 10px;border-radius:6px;color:#fff;font-weight:600;transition:all .15s;display:flex;align-items:center;gap:4px;flex-shrink:0;}
+  .chat-clear-btn:hover{background:var(--danger);border-color:var(--danger);}
+  .chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:6px;}
+  .chat-empty{text-align:center;padding:40px 12px;font-size:13px;color:var(--text-muted);line-height:1.8;}
+  .chat-msg{max-width:88%;display:flex;flex-direction:column;gap:2px;}
+  .chat-msg-me{align-self:flex-end;align-items:flex-end;}
+  .chat-msg-other{align-self:flex-start;}
+  .chat-msg-author{font-size:11px;font-weight:700;color:var(--text-muted);padding:0 4px;}
+  .chat-bubble{padding:8px 12px;border-radius:12px;font-size:13px;line-height:1.5;word-break:break-word;white-space:pre-wrap;}
+  .chat-msg-me .chat-bubble{background:var(--primary);color:#fff;border-radius:12px 12px 4px 12px;}
+  .chat-msg-other .chat-bubble{background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:12px 12px 12px 4px;}
+  .chat-msg-time{font-size:10px;color:var(--text-muted);padding:0 4px;}
+  .chat-day-sep{text-align:center;font-size:11px;color:var(--text-muted);display:flex;align-items:center;gap:8px;margin:4px 0;flex-shrink:0;}
+  .chat-day-sep::before,.chat-day-sep::after{content:'';flex:1;height:1px;background:var(--border);}
+  .chat-input-wrap{padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0;background:var(--surface);}
+  .chat-inp{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none;resize:none;color:var(--text);max-height:96px;line-height:1.5;transition:border-color .2s;}
+  .chat-inp:focus{border-color:var(--primary);}
+  .chat-send{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;transition:all .15s;}
+  .chat-send:hover{background:var(--primary-dark);}
+  .chat-send:disabled{opacity:.5;cursor:not-allowed;}
+
   /* ── FEEDBACK MODAL ── */
   .fb-editor{min-height:200px;max-height:360px;overflow-y:auto;border:1.5px solid var(--border);border-radius:8px;padding:12px 14px;font-size:14px;color:var(--text);background:var(--surface2);outline:none;line-height:1.7;transition:border-color .2s;word-wrap:break-word;}
   .fb-editor:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(43,164,232,.1);}
@@ -361,6 +393,37 @@
   .fb-thumb-wrap img{width:100%;height:100%;object-fit:cover;}
   .fb-thumb-del{position:absolute;top:2px;right:2px;width:18px;height:18px;border-radius:50%;background:rgba(229,62,62,.88);color:#fff;border:none;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
   .fb-thumb-del:hover{background:#E53935;}
+
+  /* ── MY TASKS (MANAGER) ── */
+  .my-tasks-section{margin-top:14px;border-top:1px solid var(--border);padding-top:12px;}
+  .task-item{display:flex;align-items:flex-start;gap:7px;padding:7px 8px;border-radius:6px;font-size:12px;color:var(--text);background:var(--surface2);border:1px solid var(--border);margin-bottom:5px;transition:border-color .15s;}
+  .task-item:hover{border-color:var(--primary);}
+  .task-item.overdue{border-color:var(--danger);background:#fff8f8;}
+  .task-check-btn{width:16px;height:16px;border-radius:3px;border:1.5px solid var(--border);background:#fff;cursor:pointer;flex-shrink:0;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:transparent;transition:all .15s;}
+  .task-check-btn:hover{border-color:var(--success);background:#f0faf6;color:var(--success);}
+  .task-item-body{flex:1;min-width:0;}
+  .task-client{font-size:11px;color:var(--primary-dark);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .task-text{color:var(--text);line-height:1.4;word-break:break-word;}
+  .task-due{font-size:10px;color:var(--text-muted);margin-top:2px;}
+  .task-item.overdue .task-due{color:var(--danger);font-weight:600;}
+
+  /* ── TEAM CALLS BAR ── */
+  .team-calls-bar{display:flex;align-items:center;gap:6px;padding:6px 16px;background:var(--surface);border-bottom:1px solid var(--border);flex-wrap:wrap;min-height:34px;}
+  .team-calls-bar-label{font-size:11px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.04em;flex-shrink:0;margin-right:2px;}
+  .team-calls-chips{display:flex;flex-wrap:wrap;gap:4px;flex:1;}
+  .smry-chip{display:inline-flex;align-items:center;padding:2px 8px;border-radius:99px;background:var(--surface2);border:1px solid var(--border);font-size:12px;color:var(--text);}
+  .smry-chip.smry-chip-me{background:#EBF6FE;border-color:var(--primary);color:var(--primary-dark);font-weight:600;}
+
+  /* ── STEP SKIPPED ── */
+  .step-item.skipped{opacity:0.35;pointer-events:none;}
+
+  /* ── CONFIRM MODAL ── */
+  .confirm-overlay{position:fixed;inset:0;background:rgba(13,36,71,.45);backdrop-filter:blur(2px);z-index:1000;display:flex;align-items:center;justify-content:center;}
+  .confirm-box{background:var(--surface);border-radius:14px;padding:26px 28px 22px;max-width:360px;width:90%;box-shadow:0 8px 32px rgba(13,36,71,.22);}
+  .confirm-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px;}
+  .confirm-body{font-size:14px;color:var(--text-muted);line-height:1.6;margin-bottom:16px;}
+  .confirm-warn{background:#FFF3CD;border:1px solid #FFC107;border-radius:8px;padding:10px 12px;font-size:13px;color:#7B5800;margin-bottom:16px;line-height:1.5;}
+  .confirm-btns{display:flex;gap:10px;justify-content:flex-end;}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
@@ -528,6 +591,10 @@
     <button class="btn btn-danger hidden" id="endCallBtn" onclick="endCall()">■ Завершить</button>
     <div class="icon-btn" onclick="logout()" title="Выйти">↪</div>
   </div>
+  <div id="teamCallsBar" class="team-calls-bar">
+    <span class="team-calls-bar-label">Команда:</span>
+    <span id="teamCallsChips" class="team-calls-chips"><span style="font-size:12px;color:var(--text-muted)">Загрузка...</span></span>
+  </div>
   <div class="main">
     <div class="checklist-panel">
       <div class="panel-title">Чек-лист звонка</div>
@@ -536,9 +603,9 @@
         <div class="progress-label"><span>Прогресс</span><span id="progressLabel">0 / 6</span></div>
         <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
       </div>
-      <div class="call-smry">
-        <div class="panel-title">Звонки команды</div>
-        <div id="callSummaryList"><div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center">Загрузка...</div></div>
+      <div class="my-tasks-section" id="myTasksSection">
+        <div class="panel-title">Мои задачи</div>
+        <div id="myTasksList"><div style="font-size:12px;color:var(--text-muted);padding:4px 0;text-align:center">Загрузка...</div></div>
       </div>
     </div>
     <div class="center-panel" id="centerPanel"></div>
@@ -549,6 +616,20 @@
         <div class="ref-tab" onclick="switchRefTab(this,'procedures')">Процедуры</div>
       </div>
       <div class="ref-body" id="refBody"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CHAT CLEAR MODAL ═══ -->
+<div class="modal-overlay" id="chatClearModal">
+  <div class="modal" style="width:340px;padding:24px 26px">
+    <div style="font-size:17px;font-weight:700;margin-bottom:10px;color:var(--danger)">🗑 Очистить историю чата</div>
+    <p style="color:var(--text-muted);margin:0 0 22px;line-height:1.6;font-size:14px">
+      Все сообщения будут удалены из таблицы.<br>Это действие нельзя отменить.
+    </p>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn btn-ghost" onclick="closeChatClearModal()">Отмена</button>
+      <button class="btn btn-danger" id="confirmClearBtn" onclick="confirmClearChat()">Удалить историю</button>
     </div>
   </div>
 </div>
@@ -632,6 +713,51 @@
   </div>
 </div>
 
+<!-- ═══ CHAT WIDGET (global — показывается после входа) ═══ -->
+<button class="chat-trigger hidden" id="chatTrigger" onclick="toggleChatPanel()" title="Чат команды">
+  💬<span class="chat-unread" id="chatUnread"></span>
+</button>
+<div class="chat-panel" id="chatPanel">
+  <div class="chat-hd">
+    <div class="chat-hd-title">💬 Чат команды</div>
+    <button class="chat-clear-btn hidden" id="chatClearBtn" onclick="clearChatHistory()" title="Очистить историю чата">🗑 Очистить</button>
+    <button class="chat-close-btn" onclick="toggleChatPanel()">✕</button>
+  </div>
+  <div class="chat-msgs" id="chatMsgs">
+    <div class="chat-empty">Загрузка...</div>
+  </div>
+  <div class="chat-input-wrap">
+    <textarea class="chat-inp" id="chatInput" placeholder="Сообщение..." rows="2"
+      onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+    <button class="chat-send" id="chatSendBtn" onclick="sendChatMessage()">➤</button>
+  </div>
+</div>
+
+<!-- ═══ REMINDER MODAL ═══ -->
+<div class="modal-overlay" id="reminderModal">
+  <div class="modal" style="width:420px">
+    <div class="modal-close" onclick="closeReminderModal()">✕</div>
+    <h2>📌 Создать напоминание</h2>
+    <div class="modal-sub">Напоминание появится в вашем списке «Мои задачи».</div>
+    <div class="form-group">
+      <label>Клиент</label>
+      <input type="text" id="reminderClient" placeholder="Имя клиента" />
+    </div>
+    <div class="form-group" style="margin-top:10px">
+      <label>Что нужно сделать?</label>
+      <textarea id="reminderText" rows="3" placeholder="например: перезвонить, уточнить наличие линз..."></textarea>
+    </div>
+    <div class="form-group" style="margin-top:10px">
+      <label>Выполнить до</label>
+      <input type="datetime-local" id="reminderDue" />
+    </div>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="btn btn-primary" id="reminderSaveBtn" onclick="submitReminder()">📌 Сохранить</button>
+      <button class="btn btn-ghost" onclick="closeReminderModal()">Отмена</button>
+    </div>
+  </div>
+</div>
+
 <!-- NOTIFICATION -->
 <div class="notif" id="notif">
   <div class="notif-title" id="notifTitle"></div>
@@ -695,6 +821,7 @@ let state = {
   callActive:false, timerSeconds:0, timerInterval:null,
   currentStep:1, completedSteps:new Set(),
   callType:null, appointmentData:{}, complaintData:{}, consultData:{},
+  callSaved:false,
 };
 
 // Рабочий каталог товаров: стартует со статикой, заменяется данными из листа «Товары»
@@ -781,12 +908,20 @@ function enterApp() {
     renderRefPanel('products');
     loadCallSummary();
     loadProductsFromSheet();
+    loadMyTasks();
   }
+  showChatWidget();
+  startChatPolling();
 }
 
 function logout() {
+  stopChatPolling();
+  hideChatWidget();
   app.session = null; app.pendingUser = null;
   sessionStorage.removeItem('po_session');
+  callsInitialized = false;
+  bossProductsInitialized = false;
+  productsSheetChecked = false;
   document.getElementById('loginUsername').value = '';
   document.getElementById('loginPassword').value = '';
   showScreen('screenLogin');
@@ -808,14 +943,17 @@ async function loadBossDashboard() {
   const content = document.getElementById('bossDashSection');
   content.innerHTML = '<div style="padding:40px;text-align:center;color:var(--text-muted)">⏳ Загружаем данные...</div>';
   try {
-    // Проверяем наличие листа «Товары» перед загрузкой дашборда
-    const checkRes = await api({action:'checkProductsSheet', token:app.session.token});
-    if (!checkRes.exists) { renderNoProductsSheet(); return; }
-    const [statsRes, usersRes] = await Promise.all([
+    if (!productsSheetChecked) {
+      const checkRes = await api({action:'checkProductsSheet', token:app.session.token});
+      if (!checkRes.exists) { renderNoProductsSheet(); return; }
+      productsSheetChecked = true;
+    }
+    const [statsRes, usersRes, remindersRes] = await Promise.all([
       api({action:'getStats', token:app.session.token}),
-      api({action:'getUsers', token:app.session.token})
+      api({action:'getUsers', token:app.session.token}),
+      api({action:'getReminders', token:app.session.token}),
     ]);
-    renderBossDashboard(statsRes, usersRes.users);
+    renderBossDashboard(statsRes, usersRes.users, remindersRes.reminders || []);
   } catch(e) {
     content.innerHTML = `<div style="padding:40px;text-align:center;color:var(--danger)">❌ ${e.message}</div>`;
   }
@@ -848,7 +986,8 @@ async function createProductsSheet() {
   }
 }
 
-function renderBossDashboard(stats, users) {
+function renderBossDashboard(stats, users, reminders) {
+  reminders = reminders || [];
   const content = document.getElementById('bossDashSection');
   const qVal = stats.avgQuality || 0;
   const qLabel = qVal >= 2.5 ? 'Отлично' : qVal >= 1.5 ? 'Хорошо' : qVal > 0 ? 'Требует внимания' : 'Нет данных';
@@ -935,6 +1074,29 @@ function renderBossDashboard(stats, users) {
           <td style="font-size:12px;${u.hasPass?'color:var(--success)':'color:var(--danger)'}">${u.hasPass?'✓ Задан':'⚠ Не задан'}</td>
           <td style="font-size:12px;color:var(--text-muted)">${u.created||''}</td>
         </tr>`).join('') : '<tr><td colspan="4" style="text-align:center;padding:16px;color:var(--text-muted)">Нет пользователей</td></tr>'}</tbody>
+      </table>
+    </div>
+
+    <div class="boss-section-hd" style="margin-top:8px">📌 Задачи менеджеров</div>
+    <div class="staff-section">
+      <table class="st">
+        <thead><tr><th>Менеджер</th><th>Клиент</th><th>Задача</th><th>Выполнить до</th><th>Статус</th></tr></thead>
+        <tbody>${(() => {
+          const open = reminders.filter(r => r.status !== 'done')
+            .sort((a,b) => (a.due||'').localeCompare(b.due||''));
+          if (!open.length) return '<tr><td colspan="5" style="text-align:center;padding:16px;color:var(--text-muted)">Открытых задач нет ✓</td></tr>';
+          return open.map(r => {
+            const overdue = r.due && new Date(r.due) < new Date();
+            const dueStr  = r.due ? new Date(r.due).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '—';
+            return `<tr>
+              <td><strong>${r.author||''}</strong></td>
+              <td>${r.client||'—'}</td>
+              <td style="max-width:200px;white-space:normal;font-size:13px">${r.text||''}</td>
+              <td style="font-size:12px;${overdue?'color:var(--danger);font-weight:600':'color:var(--text-muted)'}">${dueStr}</td>
+              <td><span class="sbadge ${overdue?'sbadge-r':'sbadge-b'}">${overdue?'Просрочено':'Открыто'}</span></td>
+            </tr>`;
+          }).join('');
+        })()}</tbody>
       </table>
     </div>
   `;
@@ -1026,25 +1188,20 @@ function normalizeProduct(p) {
 /* ══════════ CALL SUMMARY (MANAGER) ══════════ */
 async function loadCallSummary() {
   if (!app.session) return;
-  const el = document.getElementById('callSummaryList');
+  const el = document.getElementById('teamCallsChips');
   if (!el) return;
   try {
     const data = await api({action:'getSummary', token:app.session.token});
     if (!data.summary || !data.summary.length) {
-      el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0;text-align:center">Пока нет звонков</div>';
+      el.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">Пока нет звонков</span>';
       return;
     }
-    const medals = ['🥇','🥈','🥉'];
-    el.innerHTML = data.summary.map((s,i) => {
+    el.innerHTML = data.summary.map(s => {
       const me = s.name === app.session.username;
-      return `<div class="smry-row${me?' smry-me':''}">
-        <span class="smry-medal">${medals[i]||`${i+1}.`}</span>
-        <span class="smry-name">${s.name}</span>
-        <span class="smry-count">сег: ${s.today} / ${s.total}</span>
-      </div>`;
+      return `<span class="smry-chip${me?' smry-chip-me':''}">${s.name}: ${s.today} / ${s.total}</span>`;
     }).join('');
   } catch(e) {
-    if (el) el.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:8px 0">—</div>';
+    if (el) el.innerHTML = '<span style="font-size:12px;color:var(--text-muted)">—</span>';
   }
 }
 
@@ -1053,7 +1210,7 @@ function startCall() {
   if (state.callActive) return;
   state.callActive = true; state.timerSeconds = 0;
   state.currentStep = 1; state.completedSteps = new Set();
-  state.callType = null; state.appointmentData = {}; state.complaintData = {}; state.consultData = {};
+  state.callType = null; state.appointmentData = {}; state.complaintData = {}; state.consultData = {}; state.callSaved = false;
   document.getElementById('callBadge').classList.add('active');
   document.getElementById('callStatus').textContent = 'Звонок активен';
   document.getElementById('startCallBtn').classList.add('hidden');
@@ -1068,15 +1225,41 @@ function startCall() {
   showNotif('Звонок начат', 'Следуйте чек-листу — он поможет не упустить ни одного шага.', 'ok');
 }
 
+function showConfirm(title, body, warn, onConfirm) {
+  const ov = document.createElement('div');
+  ov.className = 'confirm-overlay';
+  const warnHtml = warn ? `<div class="confirm-warn">❗ ${warn}</div>` : '';
+  ov.innerHTML = `<div class="confirm-box">
+    <div class="confirm-title">${title}</div>
+    <div class="confirm-body">${body}</div>
+    ${warnHtml}
+    <div class="confirm-btns">
+      <button class="btn" style="background:var(--surface2);color:var(--text);border:1px solid var(--border)" onclick="this.closest('.confirm-overlay').remove()">Отмена</button>
+      <button class="btn btn-danger" id="confirmOkBtn">Завершить</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('#confirmOkBtn').onclick = () => { ov.remove(); onConfirm(); };
+}
+
 function endCall() {
   if (!state.callActive) return;
-  clearInterval(state.timerInterval); state.callActive = false;
-  document.getElementById('callBadge').classList.remove('active');
-  document.getElementById('callStatus').textContent = 'Ожидание звонка';
-  document.getElementById('startCallBtn').classList.remove('hidden');
-  document.getElementById('endCallBtn').classList.add('hidden');
-  showNotif('Звонок завершён', `Длительность: ${document.getElementById('timer').textContent}`, 'ok');
-  renderStep(6);
+  const hasData = state.completedSteps.size > 0 || !!state.appointmentData.date;
+  const warn = (!state.callSaved && hasData) ? 'Данные звонка ещё не отправлены в таблицу.' : null;
+  showConfirm(
+    'Завершить звонок?',
+    'После завершения вернуться к активному звонку не получится.',
+    warn,
+    () => {
+      clearInterval(state.timerInterval); state.callActive = false;
+      document.getElementById('callBadge').classList.remove('active');
+      document.getElementById('callStatus').textContent = 'Ожидание звонка';
+      document.getElementById('startCallBtn').classList.remove('hidden');
+      document.getElementById('endCallBtn').classList.add('hidden');
+      showNotif('Звонок завершён', `Длительность: ${document.getElementById('timer').textContent}`, 'ok');
+      renderStep(6);
+    }
+  );
 }
 
 /* ══════════ CHECKLIST ══════════ */
@@ -1086,10 +1269,16 @@ function renderChecklist() {
   STEPS.forEach(step => {
     const done = state.completedSteps.has(step.id);
     const active = state.currentStep === step.id;
+    const skipped = state.callType !== null && (
+      (step.id === 4 && state.callType !== 'complaint') ||
+      (step.id === 5 && state.callType !== 'appointment')
+    );
     const div = document.createElement('div');
-    div.className = `step-item${done?' done':''}${active?' active':''}`;
+    div.className = `step-item${done?' done':''}${active?' active':''}${skipped?' skipped':''}`;
     div.innerHTML = `<div class="step-num">${done?'✓':step.id}</div><div class="step-label">${step.label}</div><div class="step-check" onclick="toggleStep(event,${step.id})"></div>`;
-    div.onclick = e => { if (!e.target.classList.contains('step-check')) { state.currentStep=step.id; renderChecklist(); renderStep(step.id); } };
+    if (!skipped) {
+      div.onclick = e => { if (!e.target.classList.contains('step-check')) { state.currentStep=step.id; renderChecklist(); renderStep(step.id); } };
+    }
     list.appendChild(div);
   });
   updateProgress();
@@ -1103,9 +1292,13 @@ function toggleStep(e, stepId) {
 }
 
 function updateProgress() {
-  const done = state.completedSteps.size, total = STEPS.length;
+  const skippedIds = state.callType !== null
+    ? STEPS.filter(s => (s.id===4&&state.callType!=='complaint')||(s.id===5&&state.callType!=='appointment')).map(s=>s.id)
+    : [];
+  const total = STEPS.length - skippedIds.length;
+  const done = [...state.completedSteps].filter(id => !skippedIds.includes(id)).length;
   document.getElementById('progressLabel').textContent = `${done} / ${total}`;
-  document.getElementById('progressFill').style.width = `${(done/total)*100}%`;
+  document.getElementById('progressFill').style.width = total ? `${(done/total)*100}%` : '0%';
 }
 
 /* ══════════ CENTER PANEL ══════════ */
@@ -1165,7 +1358,7 @@ function renderRadioSection(step) {
     const div = mk('div','radio-option');
     if (state.callType===opt.id) div.classList.add('selected');
     div.innerHTML = `<div class="radio-dot"></div>${opt.emoji} ${opt.label}`;
-    div.onclick = () => { document.querySelectorAll('.radio-option').forEach(d=>d.classList.remove('selected')); div.classList.add('selected'); state.callType=opt.id; };
+    div.onclick = () => { document.querySelectorAll('.radio-option').forEach(d=>d.classList.remove('selected')); div.classList.add('selected'); state.callType=opt.id; renderChecklist(); };
     rg.appendChild(div);
   });
   wrap.appendChild(rg); return wrap;
@@ -1243,6 +1436,11 @@ function renderSummary() {
       <div class="sheets-label"><strong>Сохранить в Google Таблицу</strong>Данные звонка будут добавлены в общую таблицу</div>
       <button class="btn btn-primary" id="sendSheetsBtn" onclick="sendToSheets()">Отправить</button>
     </div>
+    <div class="sheets-bar" style="margin-top:10px;background:linear-gradient(135deg,#f0faf6,#f8fffc);border-color:var(--success)">
+      <div class="sheets-icon">📌</div>
+      <div class="sheets-label"><strong>Создать напоминание</strong>Сохранить задачу по этому звонку</div>
+      <button class="btn btn-success" onclick="openReminderModal()">Добавить</button>
+    </div>
     <div style="margin-top:12px;display:flex;gap:10px">
       <button class="btn btn-success" onclick="resetCall()" style="font-size:14px;padding:10px 22px">+ Новый звонок</button>
     </div>`;
@@ -1273,6 +1471,7 @@ async function sendToSheets() {
       notes:state.consultData.cInterest||'',
     });
     showNotif('✅ Сохранено', client?`Звонок с ${client} сохранён`:'Данные сохранены', 'ok');
+    state.callSaved = true;
     if (btn) btn.textContent = '✅ Отправлено';
     loadCallSummary();
   } catch(e) {
@@ -1284,7 +1483,7 @@ async function sendToSheets() {
 /* ══════════ RESET ══════════ */
 function resetCall() {
   clearInterval(state.timerInterval);
-  state = {callActive:false,timerSeconds:0,timerInterval:null,currentStep:1,completedSteps:new Set(),callType:null,appointmentData:{},complaintData:{},consultData:{}};
+  state = {callActive:false,timerSeconds:0,timerInterval:null,currentStep:1,completedSteps:new Set(),callType:null,appointmentData:{},complaintData:{},consultData:{},callSaved:false};
   const timer = document.getElementById('timer');
   if (timer) timer.textContent = '00:00';
   const cn = document.getElementById('clientName'); if(cn) cn.value='';
@@ -1429,6 +1628,7 @@ function makeFaqItem(f) {
 /* ══════════ ALL CALLS SECTION ══════════ */
 let allCalls = [];
 let callsInitialized = false;
+let productsSheetChecked = false;
 
 /* ══════════ BOSS PRODUCTS SECTION ══════════ */
 let allBossProducts = [];
@@ -1809,8 +2009,11 @@ function generateScriptCode(sheetId) {
 const SHEET_ID = '${sheetId}';
 
 function doGet(e) {
-  const p = e.parameter;
   try {
+    if (!e || !e.parameter)
+      return r({error:'Нет event-объекта. Тестируйте через URL веб-приложения, не кнопкой Run в редакторе.'});
+    const p = e.parameter;
+    Logger.log('doGet action=' + p.action + ' keys=' + Object.keys(p).join(','));
     switch (p.action) {
       case 'login':               return r(login(p));
       case 'setPassword':         return r(setPassword(p));
@@ -1823,7 +2026,15 @@ function doGet(e) {
       case 'checkProductsSheet':  return r(checkProductsSheet(p));
       case 'ensureProductsSheet': return r(ensureProductsSheet(p));
       case 'getProducts':         return r(getProducts(p));
-      default:                    return r({error:'Unknown action'});
+      case 'sendMessage':         return r(sendMessage(p));
+      case 'getMessages':         return r(getMessages(p));
+      case 'clearChat':           return r(clearChat(p));
+      case 'saveReminder':        return r(saveReminder(p));
+      case 'getReminders':        return r(getReminders(p));
+      case 'completeReminder':    return r(completeReminder(p));
+      default:
+        Logger.log('Unknown action: [' + p.action + ']');
+        return r({error:'Unknown action: [' + p.action + '] keys=' + Object.keys(p).join(',')});
     }
   } catch(err) { return r({error: err.message}); }
 }
@@ -1899,7 +2110,16 @@ function guard(token, role) {
   return s;
 }
 
+function cleanSessions() {
+  const sh = sSheet();
+  const d = sh.getDataRange().getValues();
+  const now = new Date();
+  for (let i = d.length - 1; i >= 1; i--)
+    if (new Date(d[i][3]) <= now) sh.deleteRow(i + 1);
+}
+
 function login(p) {
+  cleanSessions();
   const u = findUser(p.username);
   if (!u) return {error:'Пользователь не найден'};
   if (u.hash==='') return {status:'first_login',role:u.role,username:u.name};
@@ -2099,6 +2319,56 @@ function getProducts(p) {
   return {status:'ok', products};
 }
 
+// ─── ЧАТ ─────────────────────────────────────────────────
+
+function _fmtTime(d) {
+  var p = function(n){return n<10?'0'+n:n;};
+  return p(d.getDate())+'.'+p(d.getMonth()+1)+'.'+d.getFullYear()+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+function chatSheet() {
+  return mkSheet('Чат', ['ID','Время','Автор','Роль','Сообщение'], '#7B2BA4');
+}
+
+function sendMessage(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const text = (p.text || '').trim().slice(0, 800);
+  if (!text) throw new Error('Пустое сообщение');
+  const id = Date.now();
+  const sheet = chatSheet();
+  sheet.appendRow([id, _fmtTime(new Date()), s.name, s.role, text]);
+  const lastRow = sheet.getLastRow();
+  if (lastRow > 501) sheet.deleteRows(2, lastRow - 1 - 400);
+  return {status:'ok', id};
+}
+
+function clearChat(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  if (s.role !== 'boss') throw new Error('Только для начальника');
+  const sheet = chatSheet();
+  const last = sheet.getLastRow();
+  if (last > 1) sheet.deleteRows(2, last - 1);
+  return {status:'ok'};
+}
+
+function getMessages(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const sheet = chatSheet();
+  if (sheet.getLastRow() <= 1) return {status:'ok', messages:[]};
+  const since = Number(p.since || 0);
+  const data  = sheet.getDataRange().getValues();
+  const messages = [];
+  for (let i = 1; i < data.length; i++) {
+    if (Number(data[i][0]) > since)
+      messages.push({id:data[i][0], timestamp:String(data[i][1]),
+        author:String(data[i][2]), role:String(data[i][3]), text:String(data[i][4])});
+  }
+  return {status:'ok', messages: messages.slice(-80)};
+}
+
 function sendFeedbackWithImages(p) {
   const s = checkToken(p.token);
   if (!s) throw new Error('Не авторизован');
@@ -2159,11 +2429,141 @@ function sendFeedbackWithImages(p) {
   return {status: 'ok', sent: true};
 }
 
+// ─── НАПОМИНАНИЯ ─────────────────────────────────────────
+
+function remSheet() {
+  return mkSheet('Напоминания', ['ID','Автор','Клиент','Текст','Создано','Выполнить до','Статус'], '#7B5FA4');
+}
+
+function saveReminder(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const id = 'rem_' + Date.now();
+  remSheet().appendRow([id, s.name, p.client||'', p.text||'', new Date().toISOString(), p.due||'', 'open']);
+  return {status:'ok', id};
+}
+
+function getReminders(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const sheet = remSheet();
+  if (sheet.getLastRow() <= 1) return {status:'ok', reminders:[]};
+  const data = sheet.getDataRange().getValues();
+  const reminders = [];
+  for (let i = 1; i < data.length; i++) {
+    const row = data[i];
+    if (!row[0]) continue;
+    if (s.role !== 'boss' && row[1] !== s.name) continue;
+    reminders.push({
+      id:String(row[0]), author:String(row[1]), client:String(row[2]),
+      text:String(row[3]), created:String(row[4]), due:String(row[5]), status:String(row[6])
+    });
+  }
+  return {status:'ok', reminders};
+}
+
+function completeReminder(p) {
+  const s = checkToken(p.token);
+  if (!s) throw new Error('Не авторизован');
+  const sheet = remSheet();
+  const data = sheet.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][0]) === String(p.id)) {
+      if (s.role !== 'boss' && data[i][1] !== s.name) throw new Error('Нет доступа');
+      sheet.getRange(i + 1, 7).setValue('done');
+      return {status:'ok'};
+    }
+  }
+  throw new Error('Напоминание не найдено');
+}
+
 // Запустите эту функцию один раз в редакторе Apps Script для авторизации GmailApp
 function triggerMailAuth() {
   const count = GmailApp.getInboxUnreadCount();
   Logger.log('GmailApp авторизован. Непрочитанных писем: ' + count);
 }`;
+}
+
+/* ══════════ REMINDERS (MY TASKS) ══════════ */
+function openReminderModal() {
+  const client = document.getElementById('clientName')?.value || '';
+  document.getElementById('reminderClient').value = client;
+  document.getElementById('reminderText').value = '';
+  const d = new Date(); d.setDate(d.getDate() + 1);
+  const pad = n => String(n).padStart(2, '0');
+  document.getElementById('reminderDue').value =
+    `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  document.getElementById('reminderModal').classList.add('open');
+  setTimeout(() => document.getElementById('reminderText').focus(), 60);
+}
+
+function closeReminderModal() {
+  document.getElementById('reminderModal').classList.remove('open');
+}
+
+document.getElementById('reminderModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeReminderModal();
+});
+
+async function submitReminder() {
+  const client = document.getElementById('reminderClient').value.trim();
+  const text   = document.getElementById('reminderText').value.trim();
+  const due    = document.getElementById('reminderDue').value;
+  if (!text) { showNotif('⚠️ Заполните текст задачи', '', 'err'); return; }
+  const btn = document.getElementById('reminderSaveBtn');
+  btn.disabled = true; btn.textContent = '⏳ Сохраняем...';
+  try {
+    await api({action:'saveReminder', token:app.session.token, client, text, due});
+    showNotif('📌 Напоминание создано', client ? `Клиент: ${client}` : text, 'ok');
+    closeReminderModal();
+    loadMyTasks();
+  } catch(e) {
+    showNotif('❌ Ошибка', e.message, 'err');
+  }
+  btn.disabled = false; btn.textContent = '📌 Сохранить';
+}
+
+async function loadMyTasks() {
+  if (!app.session) return;
+  try {
+    const data = await api({action:'getReminders', token:app.session.token});
+    renderMyTasks(data.reminders || []);
+  } catch(e) { /* некритично */ }
+}
+
+function renderMyTasks(tasks) {
+  const list = document.getElementById('myTasksList');
+  if (!list) return;
+  const open = tasks.filter(t => t.status !== 'done')
+    .sort((a, b) => (a.due || '').localeCompare(b.due || ''));
+  if (!open.length) {
+    list.innerHTML = '<div style="font-size:12px;color:var(--text-muted);padding:4px 0;text-align:center">Задач нет ✓</div>';
+    return;
+  }
+  const now = new Date();
+  list.innerHTML = '';
+  open.forEach(t => {
+    const overdue = t.due && new Date(t.due) < now;
+    const dueStr  = t.due ? new Date(t.due).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : '';
+    const item = mk('div', `task-item${overdue ? ' overdue' : ''}`);
+    item.innerHTML = `
+      <div class="task-check-btn" onclick="completeTask('${t.id}')" title="Отметить выполненной">✓</div>
+      <div class="task-item-body">
+        ${t.client ? `<div class="task-client">${notesEsc(t.client)}</div>` : ''}
+        <div class="task-text">${notesEsc(t.text)}</div>
+        ${dueStr ? `<div class="task-due">${overdue ? '⚠ ' : ''}${dueStr}</div>` : ''}
+      </div>`;
+    list.appendChild(item);
+  });
+}
+
+async function completeTask(id) {
+  try {
+    await api({action:'completeReminder', token:app.session.token, id});
+    loadMyTasks();
+  } catch(e) {
+    showNotif('❌ Ошибка', e.message, 'err');
+  }
 }
 
 /* ══════════ NOTIFICATION ══════════ */
@@ -2219,6 +2619,7 @@ function notesSave(notes) {
 function toggleNotesPanel() {
   const panel = document.getElementById('notesPanel');
   const isOpen = panel.classList.toggle('open');
+  document.querySelector('.notes-trigger').style.display = isOpen ? 'none' : '';
   if (isOpen) notesRender();
 }
 
@@ -2588,6 +2989,159 @@ async function fbSend() {
     showNotif('❌ Ошибка', e.message, 'err');
     btn.disabled = false; btn.textContent = '📤 Отправить';
   }
+}
+
+/* ══════════ CHAT ══════════ */
+let _chatInterval  = null;
+let _chatLastId    = 0;
+let _chatUnreadCnt = 0;
+let _chatLoading   = false;
+
+function showChatWidget() {
+  document.getElementById('chatTrigger').classList.remove('hidden');
+  const clearBtn = document.getElementById('chatClearBtn');
+  if (clearBtn) clearBtn.classList.toggle('hidden', app.session.role !== 'boss');
+}
+function hideChatWidget() {
+  document.getElementById('chatTrigger').classList.add('hidden');
+  document.getElementById('chatPanel').classList.remove('open');
+  _chatLastId    = 0;
+  _chatUnreadCnt = 0;
+  _chatLoading   = false;
+  _chatUpdateBadge();
+  const msgs = document.getElementById('chatMsgs');
+  if (msgs) msgs.innerHTML = '<div class="chat-empty">Загрузка...</div>';
+}
+
+function toggleChatPanel() {
+  const panel = document.getElementById('chatPanel');
+  const opening = !panel.classList.contains('open');
+  panel.classList.toggle('open', opening);
+  document.getElementById('chatTrigger').style.display = opening ? 'none' : '';
+  if (opening) {
+    _chatUnreadCnt = 0;
+    _chatUpdateBadge();
+    setTimeout(() => {
+      const msgs = document.getElementById('chatMsgs');
+      if (msgs) msgs.scrollTop = msgs.scrollHeight;
+      const inp = document.getElementById('chatInput');
+      if (inp) inp.focus();
+    }, 60);
+  }
+}
+
+function startChatPolling() {
+  stopChatPolling();
+  _chatLoadMessages(true);
+  _chatInterval = setInterval(() => _chatLoadMessages(false), 4000);
+}
+function stopChatPolling() {
+  if (_chatInterval) { clearInterval(_chatInterval); _chatInterval = null; }
+}
+
+async function _chatLoadMessages(initial) {
+  if (_chatLoading || !app.session) return;
+  _chatLoading = true;
+  try {
+    const data = await api({action:'getMessages', token:app.session.token, since:_chatLastId});
+    if (!data.messages) return;
+    const msgs   = document.getElementById('chatMsgs');
+    const panel  = document.getElementById('chatPanel');
+    if (!msgs) return;
+    const isOpen = panel && panel.classList.contains('open');
+
+    if (initial && !data.messages.length) {
+      msgs.innerHTML = '<div class="chat-empty">Сообщений пока нет.<br>Начните общение! 👋</div>';
+      return;
+    }
+
+    data.messages.forEach(msg => {
+      const empty = msgs.querySelector('.chat-empty');
+      if (empty) empty.remove();
+      msgs.appendChild(_chatBuildMsg(msg));
+      if (Number(msg.id) > _chatLastId) _chatLastId = Number(msg.id);
+      if (!isOpen && msg.author !== app.session.username) _chatUnreadCnt++;
+    });
+
+    _chatUpdateBadge();
+    if (isOpen) msgs.scrollTop = msgs.scrollHeight;
+  } catch(e) { /* чат некритичен */ }
+  finally { _chatLoading = false; }
+}
+
+function _chatFormatTime(id) {
+  const d = new Date(Number(id));
+  const now = new Date();
+  const pad = n => n < 10 ? '0' + n : String(n);
+  const time = pad(d.getHours()) + ':' + pad(d.getMinutes());
+  if (d.toDateString() === now.toDateString()) return time;
+  return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + ' ' + time;
+}
+
+function _chatBuildMsg(msg) {
+  const me = msg.author === app.session.username;
+  const div = mk('div', `chat-msg ${me ? 'chat-msg-me' : 'chat-msg-other'}`);
+  const timePart = _chatFormatTime(msg.id);
+  const roleIcon = msg.role === 'boss' ? ' 👑' : '';
+  div.innerHTML = (!me ? `<div class="chat-msg-author">${notesEsc(msg.author)}${roleIcon}</div>` : '') +
+    `<div class="chat-bubble">${notesEsc(msg.text).replace(/\n/g,'<br>')}</div>` +
+    `<div class="chat-msg-time">${timePart}</div>`;
+  return div;
+}
+
+function _chatUpdateBadge() {
+  const badge = document.getElementById('chatUnread');
+  if (!badge) return;
+  if (_chatUnreadCnt > 0) {
+    badge.textContent = _chatUnreadCnt > 9 ? '9+' : String(_chatUnreadCnt);
+    badge.classList.add('show');
+  } else {
+    badge.classList.remove('show');
+  }
+}
+
+function clearChatHistory() {
+  if (!app.session || app.session.role !== 'boss') return;
+  document.getElementById('chatClearModal').classList.add('open');
+}
+function closeChatClearModal() {
+  document.getElementById('chatClearModal').classList.remove('open');
+}
+async function confirmClearChat() {
+  closeChatClearModal();
+  const btn = document.getElementById('confirmClearBtn');
+  if (btn) btn.disabled = true;
+  try {
+    await api({action:'clearChat', token:app.session.token});
+    _chatLastId = 0;
+    const msgs = document.getElementById('chatMsgs');
+    if (msgs) msgs.innerHTML = '<div class="chat-empty">История очищена.</div>';
+    showNotif('✅ Чат очищен', '', 'ok');
+  } catch(e) {
+    showNotif('❌ Ошибка', e.message, 'err');
+  }
+  if (btn) btn.disabled = false;
+}
+
+async function sendChatMessage() {
+  if (!app.session) return;
+  const inp  = document.getElementById('chatInput');
+  const text = inp.value.trim();
+  if (!text) return;
+  const btn = document.getElementById('chatSendBtn');
+  btn.disabled = true;
+  inp.value = '';
+  try {
+    await api({action:'sendMessage', token:app.session.token, text});
+    await _chatLoadMessages(false);
+    const msgs = document.getElementById('chatMsgs');
+    if (msgs) msgs.scrollTop = msgs.scrollHeight;
+  } catch(e) {
+    showNotif('❌ Ошибка чата', e.message, 'err');
+    inp.value = text;
+  }
+  btn.disabled = false;
+  inp.focus();
 }
 </script>
 </body>
